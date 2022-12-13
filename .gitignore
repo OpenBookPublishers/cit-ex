@@ -1,0 +1,4 @@
+.env
+cit-ex/lib/__pycache__/
+.coverage
+htmlcov/
