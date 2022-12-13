@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from bs4 import BeautifulSoup
 from ebooklib import epub, ITEM_DOCUMENT
 
 
@@ -41,3 +42,16 @@ class Extractor:
     def _get_docs(self) -> list:
         """Return a list of the book ITEM_DOCUMENT items (i.e. chapters)"""
         return list(self.book.get_items_of_type(ITEM_DOCUMENT))
+
+    def exctract_cit(self, html_class: str = None) -> list:
+        """Parse book documents and look for paragraphs with class html_class.
+           The results is a list of unstructured citations."""
+        book_cit = []
+        if html_class:
+            for doc in self.docs:
+                soup = BeautifulSoup(doc.get_body_content(), "html.parser")
+                doc_cit = [c.get_text() for c in
+                           soup.find_all(class_=html_class)]
+                book_cit.extend(doc_cit)
+
+        return book_cit

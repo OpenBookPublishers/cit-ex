@@ -74,3 +74,34 @@ def test_get_docs(dummy_epub):
     book = Extractor(dummy_epub)
     chapters = Extractor._get_docs(book)
     assert chapters[0].get_name() == "ch1.xhtml"
+
+
+@pytest.fixture
+def dummy_chapter():
+    book = epub.EpubBook()
+
+    ch1 = epub.EpubHtml(title="Intro", file_name="ch1.xhtml", lang="en-gb")
+    ch1.content = "<h1>Heading</h1><p>First paragraph.</p>" + \
+                  "<p class='citation'>This citation</p>"
+    book.add_item(ch1)
+    yield ch1
+
+
+class MockExtractor:
+    def __init__(self, *dummy_chapter):
+        self.docs = list(dummy_chapter)
+
+
+def test_exctract_cit_w_good_input(dummy_chapter):
+    book = MockExtractor(dummy_chapter)
+    assert Extractor.exctract_cit(book, "citation") == ["This citation"]
+
+
+def test_exctract_cit_w_empty_input(dummy_chapter):
+    book = MockExtractor(dummy_chapter)
+    assert Extractor.exctract_cit(book, "") == []
+
+
+def test_exctract_cit_w_non_matching_input(dummy_chapter):
+    book = MockExtractor(dummy_chapter)
+    assert Extractor.exctract_cit(book, "FooBar") == []

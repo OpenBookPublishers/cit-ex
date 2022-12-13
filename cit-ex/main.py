@@ -31,10 +31,16 @@ def main():
     )
     parser.add_argument("epub", type=argparse.FileType("r"),
                         help="File path of the EPUB to parse.")
+    parser.add_argument("-c", "--classes", type=str, nargs="+", default="",
+                        help="HTML class(es) of the citation nodes. "
+                             "This parameter accepts multiple values.")
     args = parser.parse_args()
 
     ex = Extractor(args.epub.name)
-    print(ex.book)
+    unstr_citations = []
+    for class_ in args.classes:
+        unstr_citations.extend(ex.exctract_cit(class_))
+    print(unstr_citations)
 
 
 if __name__ == "__main__":  # pragma: no cover
