@@ -55,17 +55,13 @@ def test_get_book_w_good_input(dummy_epub):
     assert type(ex.book).__name__ == "EpubBook"
 
 
-def test_get_book_w_empty_input():
+@pytest.mark.parametrize("input", ["", "/foo/bar.epub"])
+def test_get_book_raise_FileNotFoundError(input):
     with pytest.raises(FileNotFoundError):
-        _ = Extractor("")
+        _ = Extractor(input)
 
 
-def test_get_book_w_nonexistent_input():
-    with pytest.raises(FileNotFoundError):
-        _ = Extractor("/foo/bar.epub")
-
-
-def test_get_book_w_bad_input(dummy_epub):
+def test_get_book_raise_EpubException(dummy_epub):
     with pytest.raises(epub.EpubException):
         _ = Extractor(open(dummy_epub))
 
@@ -97,11 +93,7 @@ def test_exctract_cit_w_good_input(dummy_chapter):
     assert Extractor.exctract_cit(book, "citation") == ["This citation"]
 
 
-def test_exctract_cit_w_empty_input(dummy_chapter):
+@pytest.mark.parametrize("input", ["", "FooBar"])
+def test_exctract_cit_w_bad_input(dummy_chapter, input):
     book = MockExtractor(dummy_chapter)
-    assert Extractor.exctract_cit(book, "") == []
-
-
-def test_exctract_cit_w_non_matching_input(dummy_chapter):
-    book = MockExtractor(dummy_chapter)
-    assert Extractor.exctract_cit(book, "FooBar") == []
+    assert Extractor.exctract_cit(book, input) == []
