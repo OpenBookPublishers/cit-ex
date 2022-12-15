@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import argparse
 
 from lib.extractor import Extractor
+from lib.parser import Parser
 
 
 def main():
@@ -40,7 +41,14 @@ def main():
     unstr_citations = []
     for class_ in args.classes:
         unstr_citations.extend(ex.exctract_cit(class_))
-    print(unstr_citations)
+
+    citations = []
+    for c in unstr_citations:
+        citations.append(Parser(c).get_citation())
+
+    for c in citations:
+        if c.doi:
+            print(c)
 
 
 if __name__ == "__main__":  # pragma: no cover
