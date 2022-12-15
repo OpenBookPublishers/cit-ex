@@ -44,7 +44,11 @@ def main():
 
     citations = []
     for c in unstr_citations:
-        citations.append(Parser(c))
+        citations.append(Parser(c).get_citation())
+
+    for c in citations:
+        if c.doi:
+            print(c)
 
 
 if __name__ == "__main__":  # pragma: no cover

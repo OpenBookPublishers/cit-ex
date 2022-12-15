@@ -1,11 +1,20 @@
+from dataclasses import dataclass
 import re
 
 
+@dataclass
+class Citation:
+    unstr_citation: str = None
+    doi: str = None
+
+
 class Parser():
-    """Class to parse unstructured citations
+    """Class to parse unstructured citations.
+       The method get_citation returns a Citation object to (hopefully) ease
+       further processing via dependency injection.
 
        Note: this class makes little sense in the present state
-             (i.e. cold be replaced by a Citation method), but it is
+             (i.e. could be replaced with a Citation method), but it is
              meant to be extended in the feature to allow retrival of
              additional (meta)data fields."""
     def __init__(self, unstr_citation: str = None) -> None:
@@ -20,3 +29,7 @@ class Parser():
         if result:
             return result.group()
         return None
+
+    def get_citation(self) -> Citation:
+        """Return a Citation object with the data gathered with the Parser"""
+        return Citation(self.unstr_citation, self.doi)

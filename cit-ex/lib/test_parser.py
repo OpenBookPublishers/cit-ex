@@ -1,6 +1,6 @@
 import pytest
 
-from parser import Parser
+from parser import Citation, Parser
 
 
 def test_parser_has_attributes():
@@ -46,3 +46,32 @@ def test_search_doi_w_empty_or_insufficient_input(unstr_citation):
 def test_search_doi_regex_efficacy(unstr_citation, expected_result):
     p = Parser(unstr_citation)
     assert p.doi == expected_result
+
+
+class DummyParser():
+    def __init__(self, unstr_citation):
+        self.unstr_citation = unstr_citation
+        self.doi = None
+
+
+def test_get_citation():
+    p = DummyParser(None)
+    assert Parser.get_citation(p) == Citation()
+
+
+def test_citation_init():
+    c = Citation("FooBar 10.123/123", "10.123/123")
+    assert c.unstr_citation == "FooBar 10.123/123"
+    assert c.doi == "10.123/123"
+
+
+def test_citation_named_init():
+    c = Citation(unstr_citation="FooBar 10.123/123", doi="10.123/123")
+    assert c.unstr_citation == "FooBar 10.123/123"
+    assert c.doi == "10.123/123"
+
+
+def test_citation_init_no_args():
+    c = Citation()
+    assert c.unstr_citation is None
+    assert c.doi is None
