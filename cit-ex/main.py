@@ -64,7 +64,11 @@ def main():
         if args.repository == "thoth":
             rep = Thoth(username=getenv('THOTH_EMAIL'),
                         password=getenv('THOTH_PWD'))
-            print(rep.username)
+        else:
+            raise ValueError(f"The repository name '{args.repository}' "
+                             "is invalid or not implemented yet.")
+
+        rep.init_connection()
 
 
 if __name__ == "__main__":  # pragma: no cover

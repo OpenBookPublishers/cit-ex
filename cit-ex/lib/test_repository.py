@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
 
-from repository import Repository, Thoth
+from repository import Repository
 
 
 def test_repository_attributes():
@@ -49,7 +49,24 @@ def test_repository_init_connection():
         _ = Repository.init_connection("foobar")
 
 
-def test_thoth_init():
-    rep = Thoth("foo", "bar")
-    assert rep.username == "foo"
-    assert rep.password == "bar"
+def test_validate_credentials_valid_username():
+    rep = Repository("Foo", "Bar")
+    assert Repository._validate_credentials(rep) is True
+
+
+@pytest.mark.parametrize("username, password",
+                         [[None, "bar"],
+                          [{"username": "Foo"}, "bar"]])
+def test_validate_credentials_bad_username(username, password):
+    with pytest.raises(ValueError, match=r"provide a valid username"):
+        rep = Repository(username, password)
+        rep._validate_credentials()
+
+
+@pytest.mark.parametrize("username, password",
+                         [["foo", None],
+                          ["foo", {"password": "bar"}]])
+def test_validate_credentials_bad_password(username, password):
+    with pytest.raises(ValueError, match=r"provide a valid password"):
+        rep = Repository(username, password)
+        rep._validate_credentials()
