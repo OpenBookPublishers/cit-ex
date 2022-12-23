@@ -39,6 +39,9 @@ def main():
                              "This parameter accepts multiple values.")
     parser.add_argument("-r", "--repository", type=str, default="thoth",
                         help="Name of the metadata repository.")
+    parser.add_argument("-i", "--identifier", type=str, default=None,
+                        help="Work identifier on the repository. Depending on "
+                             "the repository, this could be a DOI or UUID.")
     parser.add_argument("-d", "--dry-run", action='store_true',
                         help="Perform a dry run: no data would be sent to "
                              "metadata repositories.")
@@ -64,11 +67,12 @@ def main():
         if args.repository == "thoth":
             rep = Thoth(username=getenv('THOTH_EMAIL'),
                         password=getenv('THOTH_PWD'))
+            rep.init_connection()
+            rep.resolve_identifier(args.identifier)
+            print(rep.identifier)
         else:
             raise ValueError(f"The repository name '{args.repository}' "
                              "is invalid or not implemented yet.")
-
-        rep.init_connection()
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -70,3 +70,9 @@ def test_validate_credentials_bad_password(username, password):
     with pytest.raises(ValueError, match=r"provide a valid password"):
         rep = Repository(username, password)
         rep._validate_credentials()
+
+
+def test_repository_write_record():
+    with pytest.raises(NotImplementedError):
+        rep = Repository()
+        rep.write_record()
