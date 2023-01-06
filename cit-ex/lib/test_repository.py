@@ -55,19 +55,18 @@ def test_validate_credentials_valid_username():
 
 
 @pytest.mark.parametrize("username, password",
-                         [[None, "bar"],
-                          [{"username": "Foo"}, "bar"]])
+                         [[None, "bar"], ["foo", None]])
 def test_validate_credentials_bad_username(username, password):
-    with pytest.raises(ValueError, match=r"provide a valid username"):
+    with pytest.raises(ValueError, match=r"provide a (username|password)"):
         rep = Repository(username, password)
         rep._validate_credentials()
 
 
 @pytest.mark.parametrize("username, password",
-                         [["foo", None],
+                         [[{"username": "Foo"}, "bar"],
                           ["foo", {"password": "bar"}]])
 def test_validate_credentials_bad_password(username, password):
-    with pytest.raises(ValueError, match=r"provide a valid password"):
+    with pytest.raises(TypeError, match=r"a valid (username|password)"):
         rep = Repository(username, password)
         rep._validate_credentials()
 

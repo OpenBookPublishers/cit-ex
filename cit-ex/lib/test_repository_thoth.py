@@ -28,22 +28,19 @@ def test_thoth_init():
 
 
 def test_thoth_init_connection(mocker):
-    def mock_login(*args, **kwargs):
-        return "Connection successful!"
-
     rep = Thoth()
     mocker.patch("repository.Thoth._validate_credentials", return_value=True)
-    mocker.patch("repository.ThothClient.login", mock_login)
+    login = mocker.patch("repository.ThothClient.login")
     rep.init_connection()
 
-    assert rep.connection == "Connection successful!"
+    login.assert_called_once()
 
 
 def test_thoth_init_connection_w_bad_credentials(mocker):
     rep = Thoth()
     mocker.patch("repository.Thoth._validate_credentials", return_value=False)
 
-    assert rep.connection is None
+    assert rep.client is None
 
 
 def test_resolve_identifier_w_valid_doi():
@@ -110,7 +107,8 @@ def test_resolve_identifier_w_invalid_uuid_not_hex_digit_clusters(uuid):
         rep.resolve_identifier(uuid)
 
 
-@pytest.mark.parametrize("uuid", [None, {}])
+@pytest.mark.parametrize("uuid", [["a28326e3-e86b-4e6c-8538-4ed0306d4259"],
+                                  {}])
 def test_resolve_identifier_w_invalid_uuid(uuid):
     with pytest.raises(TypeError):
         rep = Thoth()

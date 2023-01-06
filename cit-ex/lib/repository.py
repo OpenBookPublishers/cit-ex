@@ -30,7 +30,6 @@ class Repository():
         self.username = username
         self.password = password
         self.client = None
-        self.connection = None
         self.identifier = None
 
     def init_connection(self) -> None:
@@ -42,13 +41,17 @@ class Repository():
            Specifically, this method checks that username and password
            are (1) not None (default value assigned by Reposotory())
            and (2) strings"""
-        if self.username is None or type(self.username) != str:
-            raise ValueError(f"Please provide a valid username. "
-                             f"'{type(self.username)}' offered, expected str.")
-        if self.password is None or type(self.password) != str:
-            raise ValueError(f"Please provide a valid password. "
-                             f"'{type(self.password)}' offered, expected str.")
-        return True
+        credentials = [("username", self.username),
+                       ("password", self.password)]
+
+        for element, value in credentials:
+            if value is None:
+                raise ValueError(f"Please provide a {element}, none given.")
+            if type(value) != str:
+                raise TypeError(f"Please provide a valid password. "
+                                f"'{type(value)}' offered, expected str.")
+        else:
+            return True
 
     def write_record(self, citation: Citation = None, id: str = None) -> None:
         """Write a citation record at the specified identifier"""
@@ -60,11 +63,11 @@ class Thoth(Repository):
     def init_connection(self) -> None:
         if self._validate_credentials():
             self.client = ThothClient()
-            self.connection = self.client.login(self.username, self.password)
+            self.client.login(self.username, self.password)
 
     def resolve_identifier(self, identifier: str = None) -> None:
         """User would input either a DOI or a UUID from the CLI. This method
-           firures out which one was given, in the case of DOI resolves it and
+           figures out which one was given, in the case of DOI resolves it and
            finally stores the corresponding UUID in self.identifier.
 
            Accepted formats are:
@@ -73,18 +76,20 @@ class Thoth(Repository):
                 + 10.11647/obp.0288
             - UUID:
                 + cedb58f1-b88f-476c-b7c8-bc5869a2a6ba"""
-        doi_regex = re.compile(r"(10\.\d{3,6}\/\S*)")
-        uuid_regex = re.compile(r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-"
-                                r"[a-f0-9]{4}-[a-f0-9]{12})")
-
-        if identifier is None or type(identifier) != str:
+        if identifier is None:
+            raise ValueError("Empty value supplied for identifier")
+        elif type(identifier) != str:
             raise TypeError(f"Invalid identifier type. '{type(identifier)}' "
                             "supplied, expected a string.")
-        elif doi_regex.search(identifier):
+
+        doi_regex = re.compile(r"(10\.\d{3,6}\/\S*)")
+        uuid_regex = re.compile(r"([a-f0-9]{8}-(?:[a-f0-9]{4}-){3}"
+                                r"[a-f0-9]{12})")
+
+        if doi_regex.search(identifier):
             doi = doi_regex.search(identifier).group()
             work = self.client.work_by_doi(urljoin("https://doi.org/", doi))
             self.identifier = work.workId
-
         elif uuid_regex.search(identifier):
             self.identifier = uuid_regex.search(identifier).group()
         else:
