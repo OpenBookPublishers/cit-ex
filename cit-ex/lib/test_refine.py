@@ -5,33 +5,33 @@ from refine import Citation, Refine
 
 def test_refine_has_attributes():
     p = Refine("FooBar")
-    assert hasattr(p, "unstr_citation")
+    assert hasattr(p, "unstructured_citation")
     assert hasattr(p, "doi")
 
 
-@pytest.mark.parametrize("unstr_citation",
+@pytest.mark.parametrize("unstructured_citation",
                          ["https://doi.org/10.11647/OBP.0288",
                           "http://dx.doi.org/10.11647/OBP.0288",
                           "https://doi.org/10.11647/OBP.0288 FooBar",
                           "FooBar https://doi.org/10.11647/OBP.0288"])
-def test_search_doi_w_good_input(unstr_citation):
-    p = Refine(unstr_citation)
+def test_search_doi_w_good_input(unstructured_citation):
+    p = Refine(unstructured_citation)
     assert p.doi == "10.11647/OBP.0288"
 
 
-@pytest.mark.parametrize("unstr_citation",
+@pytest.mark.parametrize("unstructured_citation",
                          ["",
                           "FooBar",
                           "https://doi.org/",
                           "https://doi.org/10.1/OBP.0288",
                           ])
-def test_search_doi_w_empty_or_insufficient_input(unstr_citation):
-    p = Refine(unstr_citation)
+def test_search_doi_w_empty_or_insufficient_input(unstructured_citation):
+    p = Refine(unstructured_citation)
     assert p.doi is None
 
 
 # Examples sourced from https://www.doi.org/demos.html
-@pytest.mark.parametrize("unstr_citation, expected_result",
+@pytest.mark.parametrize("unstructured_citation, expected_result",
                          [["doi:10.1038/nphys1170",
                            "10.1038/nphys1170"],
                           ["doi:10.1002/0470841559.ch1",
@@ -43,14 +43,14 @@ def test_search_doi_w_empty_or_insufficient_input(unstr_citation):
                           ["doi:10.11467/isss2003.7.1_11",
                            "10.11467/isss2003.7.1_11"]
                           ])
-def test_search_doi_regex_efficacy(unstr_citation, expected_result):
-    p = Refine(unstr_citation)
+def test_search_doi_regex_efficacy(unstructured_citation, expected_result):
+    p = Refine(unstructured_citation)
     assert p.doi == expected_result
 
 
 class DummyParser():
-    def __init__(self, unstr_citation):
-        self.unstr_citation = unstr_citation
+    def __init__(self, unstructured_citation):
+        self.unstructured_citation = unstructured_citation
         self.doi = None
 
 
@@ -61,17 +61,38 @@ def test_get_citation():
 
 def test_citation_init():
     c = Citation("FooBar 10.123/123", "10.123/123")
-    assert c.unstr_citation == "FooBar 10.123/123"
+    assert c.unstructured_citation == "FooBar 10.123/123"
     assert c.doi == "10.123/123"
 
 
 def test_citation_named_init():
-    c = Citation(unstr_citation="FooBar 10.123/123", doi="10.123/123")
-    assert c.unstr_citation == "FooBar 10.123/123"
+    c = Citation(unstructured_citation="FooBar 10.123/123", doi="10.123/123")
+    assert c.unstructured_citation == "FooBar 10.123/123"
     assert c.doi == "10.123/123"
 
 
 def test_citation_init_no_args():
     c = Citation()
-    assert c.unstr_citation is None
+    assert c.unstructured_citation is None
     assert c.doi is None
+    assert c.reference_id is None
+    assert c.work_id is None
+    assert c.reference_ordinal is None
+    assert c.issn is None
+    assert c.isbn is None
+    assert c.journal_title is None
+    assert c.article_title is None
+    assert c.series_title is None
+    assert c.volume_title is None
+    assert c.edition is None
+    assert c.author is None
+    assert c.volume is None
+    assert c.issue is None
+    assert c.first_page is None
+    assert c.component_number is None
+    assert c.standard_designator is None
+    assert c.standards_body_name is None
+    assert c.standards_body_acronym is None
+    assert c.url is None
+    assert c.publication_date is None
+    assert c.retrieval_date is None

@@ -122,49 +122,70 @@ def test_resolve_identifier_w_empty_input():
         rep.resolve_identifier("")
 
 
-@pytest.mark.parametrize("workId, referenceOrdinal, doi, unstructuredCitation",
+@pytest.mark.parametrize("work_id, reference_ordinal, doi, "
+                         "unstructured_citation",
                          [["1234", 1, "Foo Bar", "10.11647/OBP.0322"]])
-def test_write_record(workId, referenceOrdinal, doi, unstructuredCitation):
+def test_write_record(work_id, reference_ordinal,
+                      doi, unstructured_citation):
     class MockClient:
         def create_reference(self, reference):
             self.reference = reference
 
     rep = Thoth()
-    rep.identifier = workId
+    rep.identifier = work_id
     rep.client = MockClient()
-    rep.write_record(Citation(unstructuredCitation, doi), referenceOrdinal)
+    rep.write_record(Citation(unstructured_citation, doi), reference_ordinal)
 
-    assert rep.client.reference["workId"] == workId
-    assert rep.client.reference["referenceOrdinal"] == referenceOrdinal
+    assert rep.client.reference["workId"] == work_id
+    assert rep.client.reference["referenceOrdinal"] == reference_ordinal
     assert rep.client.reference["doi"] == "https://doi.org/" + doi
-    assert rep.client.reference["unstructuredCitation"] == unstructuredCitation
+    assert rep.client.reference["unstructuredCitation"] \
+        is unstructured_citation
+    assert rep.client.reference["issn"] is None
+    assert rep.client.reference["isbn"] is None
+    assert rep.client.reference["journalTitle"] is None
+    assert rep.client.reference["articleTitle"] is None
+    assert rep.client.reference["seriesTitle"] is None
+    assert rep.client.reference["volumeTitle"] is None
+    assert rep.client.reference["edition"] is None
+    assert rep.client.reference["author"] is None
+    assert rep.client.reference["volume"] is None
+    assert rep.client.reference["issue"] is None
+    assert rep.client.reference["firstPage"] is None
+    assert rep.client.reference["componentNumber"] is None
+    assert rep.client.reference["standardDesignator"] is None
+    assert rep.client.reference["standardsBodyName"] is None
+    assert rep.client.reference["standardsBodyAcronym"] is None
+    assert rep.client.reference["url"] is None
+    assert rep.client.reference["publicationDate"] is None
+    assert rep.client.reference["retrievalDate"] is None
 
 
-@pytest.mark.parametrize("workId, referenceOrdinal, citation",
+@pytest.mark.parametrize("work_id, reference_ordinal, citation",
                          [["1234", 1, None],
                           ["1234", None, Citation()]])
-def test_write_record_value_error(workId, referenceOrdinal, citation):
+def test_write_record_value_error(work_id, reference_ordinal, citation):
     class MockClient:
         def create_reference(self, reference):
             self.reference = reference
 
     with pytest.raises(ValueError):
         rep = Thoth()
-        rep.identifier = workId
+        rep.identifier = work_id
         rep.client = MockClient()
-        rep.write_record(citation, referenceOrdinal)
+        rep.write_record(citation, reference_ordinal)
 
 
-@pytest.mark.parametrize("workId, referenceOrdinal, citation",
+@pytest.mark.parametrize("work_id, reference_ordinal, citation",
                          [["1234", [1], Citation()],
                           ["1234", 1, {"citation": Citation()}]])
-def test_write_record_type_error(workId, referenceOrdinal, citation):
+def test_write_record_type_error(work_id, reference_ordinal, citation):
     class MockClient:
         def create_reference(self, reference):
             self.reference = reference
 
     with pytest.raises(TypeError):
         rep = Thoth()
-        rep.identifier = workId
+        rep.identifier = work_id
         rep.client = MockClient()
-        rep.write_record(citation, referenceOrdinal)
+        rep.write_record(citation, reference_ordinal)
