@@ -20,7 +20,7 @@ from urllib.parse import urljoin
 
 from thothlibrary import ThothClient
 
-from parser import Citation
+from refine import Citation
 
 
 class Repository():

@@ -21,7 +21,7 @@ import argparse
 from os import getenv
 
 from lib.extractor import Extractor
-from lib.parser import Parser
+from lib.refine import Refine
 from lib.repository import Thoth
 
 
@@ -53,10 +53,10 @@ def main():
     for class_ in args.classes:
         unstr_citations.extend(ex.exctract_cit(class_))
 
-    # Parse the unstructured citations and return Citation objects
+    # Process the unstructured citations and return Citation objects
     citations = []
     for c in unstr_citations:
-        citations.append(Parser(c).get_citation())
+        citations.append(Refine(c).get_citation())
 
     # If dry run, simply show citation data
     if args.dry_run:

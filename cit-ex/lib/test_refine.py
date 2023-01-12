@@ -1,10 +1,10 @@
 import pytest
 
-from parser import Citation, Parser
+from refine import Citation, Refine
 
 
-def test_parser_has_attributes():
-    p = Parser("FooBar")
+def test_refine_has_attributes():
+    p = Refine("FooBar")
     assert hasattr(p, "unstr_citation")
     assert hasattr(p, "doi")
 
@@ -15,7 +15,7 @@ def test_parser_has_attributes():
                           "https://doi.org/10.11647/OBP.0288 FooBar",
                           "FooBar https://doi.org/10.11647/OBP.0288"])
 def test_search_doi_w_good_input(unstr_citation):
-    p = Parser(unstr_citation)
+    p = Refine(unstr_citation)
     assert p.doi == "10.11647/OBP.0288"
 
 
@@ -26,7 +26,7 @@ def test_search_doi_w_good_input(unstr_citation):
                           "https://doi.org/10.1/OBP.0288",
                           ])
 def test_search_doi_w_empty_or_insufficient_input(unstr_citation):
-    p = Parser(unstr_citation)
+    p = Refine(unstr_citation)
     assert p.doi is None
 
 
@@ -44,7 +44,7 @@ def test_search_doi_w_empty_or_insufficient_input(unstr_citation):
                            "10.11467/isss2003.7.1_11"]
                           ])
 def test_search_doi_regex_efficacy(unstr_citation, expected_result):
-    p = Parser(unstr_citation)
+    p = Refine(unstr_citation)
     assert p.doi == expected_result
 
 
@@ -56,7 +56,7 @@ class DummyParser():
 
 def test_get_citation():
     p = DummyParser(None)
-    assert Parser.get_citation(p) == Citation()
+    assert Refine.get_citation(p) == Citation()
 
 
 def test_citation_init():

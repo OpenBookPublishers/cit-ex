@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from munch import Munch
 import pytest
 
-from parser import Citation
+from refine import Citation
 from repository import Thoth
 
 

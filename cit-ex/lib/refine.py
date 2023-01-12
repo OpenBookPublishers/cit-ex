@@ -8,8 +8,8 @@ class Citation:
     doi: str = None
 
 
-class Parser():
-    """Class to parse unstructured citations.
+class Refine():
+    """Class to process unstructured citations.
        The method get_citation returns a Citation object to (hopefully) ease
        further processing via dependency injection.
 
@@ -31,5 +31,5 @@ class Parser():
         return None
 
     def get_citation(self) -> Citation:
-        """Return a Citation object with the data gathered with the Parser"""
+        """Return a Citation object with the data gathered with the Refine"""
         return Citation(self.unstr_citation, self.doi)
