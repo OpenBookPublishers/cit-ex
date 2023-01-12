@@ -48,13 +48,14 @@ class Repository():
             if value is None:
                 raise ValueError(f"Please provide a {element}, none given.")
             if type(value) != str:
-                raise TypeError(f"Please provide a valid password. "
+                raise TypeError(f"Please provide a valid {element}. "
                                 f"'{type(value)}' offered, expected str.")
         else:
             return True
 
-    def write_record(self, citation: Citation = None, id: str = None) -> None:
-        """Write a citation record at the specified identifier"""
+    def write_record(self, citation: Citation = None,
+                     ordinal: int = None) -> None:
+        """Write a citation record"""
         raise NotImplementedError
 
 
@@ -95,3 +96,41 @@ class Thoth(Repository):
         else:
             raise ValueError(f"Identifier not well formatted: '{identifier}'. "
                              "Expected a DOI or UUID")
+
+    def write_record(self, citation: Citation, ordinal: int) -> None:
+        """Create the reference object and write it to the repository"""
+        args = [("citation", citation, Citation), ("ordinal", ordinal, int)]
+        for element, value, value_type in args:
+            if value is None:
+                raise ValueError(f"Please provide a {element}, none given.")
+            if not isinstance(value, value_type):
+                raise TypeError(f"Please provide a valid {element}. "
+                                f"'{type(value)}' offered, expected "
+                                f"{value_type}.")
+
+        reference = {
+            "workId":               self.identifier,
+            "referenceOrdinal":     ordinal,
+            "doi":                  urljoin("https://doi.org/", citation.doi),
+            "unstructuredCitation": citation.unstr_citation,
+            "issn":                 None,
+            "isbn":                 None,
+            "journalTitle":         None,
+            "articleTitle":         None,
+            "seriesTitle":          None,
+            "volumeTitle":          None,
+            "edition":              None,
+            "author":               None,
+            "volume":               None,
+            "issue":                None,
+            "firstPage":            None,
+            "componentNumber":      None,
+            "standardDesignator":   None,
+            "standardsBodyName":    None,
+            "standardsBodyAcronym": None,
+            "url":                  None,
+            "publicationDate":      None,
+            "retrievalDate":        None
+            }
+
+        self.client.create_reference(reference)

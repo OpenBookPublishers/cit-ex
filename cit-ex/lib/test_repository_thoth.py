@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from munch import Munch
 import pytest
 
+from parser import Citation
 from repository import Thoth
 
 
@@ -119,3 +120,51 @@ def test_resolve_identifier_w_empty_input():
     with pytest.raises(ValueError):
         rep = Thoth()
         rep.resolve_identifier("")
+
+
+@pytest.mark.parametrize("workId, referenceOrdinal, doi, unstructuredCitation",
+                         [["1234", 1, "Foo Bar", "10.11647/OBP.0322"]])
+def test_write_record(workId, referenceOrdinal, doi, unstructuredCitation):
+    class MockClient:
+        def create_reference(self, reference):
+            self.reference = reference
+
+    rep = Thoth()
+    rep.identifier = workId
+    rep.client = MockClient()
+    rep.write_record(Citation(unstructuredCitation, doi), referenceOrdinal)
+
+    assert rep.client.reference["workId"] == workId
+    assert rep.client.reference["referenceOrdinal"] == referenceOrdinal
+    assert rep.client.reference["doi"] == "https://doi.org/" + doi
+    assert rep.client.reference["unstructuredCitation"] == unstructuredCitation
+
+
+@pytest.mark.parametrize("workId, referenceOrdinal, citation",
+                         [["1234", 1, None],
+                          ["1234", None, Citation()]])
+def test_write_record_value_error(workId, referenceOrdinal, citation):
+    class MockClient:
+        def create_reference(self, reference):
+            self.reference = reference
+
+    with pytest.raises(ValueError):
+        rep = Thoth()
+        rep.identifier = workId
+        rep.client = MockClient()
+        rep.write_record(citation, referenceOrdinal)
+
+
+@pytest.mark.parametrize("workId, referenceOrdinal, citation",
+                         [["1234", [1], Citation()],
+                          ["1234", 1, {"citation": Citation()}]])
+def test_write_record_type_error(workId, referenceOrdinal, citation):
+    class MockClient:
+        def create_reference(self, reference):
+            self.reference = reference
+
+    with pytest.raises(TypeError):
+        rep = Thoth()
+        rep.identifier = workId
+        rep.client = MockClient()
+        rep.write_record(citation, referenceOrdinal)

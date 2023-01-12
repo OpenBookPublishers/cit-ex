@@ -38,11 +38,11 @@ def main():
                         help="HTML class(es) of the citation nodes. "
                              "This parameter accepts multiple values.")
     parser.add_argument("-r", "--repository", type=str, default="thoth",
-                        help="Name of the metadata repository.")
+                        help="Name of the metadata repository. Default: thoth")
     parser.add_argument("-i", "--identifier", type=str, default=None,
                         help="Work identifier on the repository. Depending on "
                              "the repository, this could be a DOI or UUID.")
-    parser.add_argument("-d", "--dry-run", action='store_true',
+    parser.add_argument("--dry-run", action='store_true',
                         help="Perform a dry run: no data would be sent to "
                              "metadata repositories.")
     args = parser.parse_args()
@@ -69,7 +69,9 @@ def main():
                         password=getenv('THOTH_PWD'))
             rep.init_connection()
             rep.resolve_identifier(args.identifier)
-            print(rep.identifier)
+
+            for ordinal, citation in enumerate(citations, start=1):
+                rep.write_record(citation, ordinal)
         else:
             raise ValueError(f"The repository name '{args.repository}' "
                              "is invalid or not implemented yet.")
