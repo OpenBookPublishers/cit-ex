@@ -3,10 +3,14 @@ import pytest
 from refine import Citation, Refine
 
 
+def test_refine_no_argument():
+    with pytest.raises(TypeError):
+        _ = Refine()
+
+
 def test_refine_has_attributes():
     p = Refine("FooBar")
-    assert hasattr(p, "unstructured_citation")
-    assert hasattr(p, "doi")
+    assert hasattr(p, "cit")
 
 
 @pytest.mark.parametrize("unstructured_citation",
@@ -16,7 +20,7 @@ def test_refine_has_attributes():
                           "FooBar https://doi.org/10.11647/OBP.0288"])
 def test_search_doi_w_good_input(unstructured_citation):
     p = Refine(unstructured_citation)
-    assert p.doi == "10.11647/OBP.0288"
+    assert p.cit.doi == "10.11647/OBP.0288"
 
 
 @pytest.mark.parametrize("unstructured_citation",
@@ -27,7 +31,7 @@ def test_search_doi_w_good_input(unstructured_citation):
                           ])
 def test_search_doi_w_empty_or_insufficient_input(unstructured_citation):
     p = Refine(unstructured_citation)
-    assert p.doi is None
+    assert p.cit.doi is None
 
 
 # Examples sourced from https://www.doi.org/demos.html
@@ -45,18 +49,12 @@ def test_search_doi_w_empty_or_insufficient_input(unstructured_citation):
                           ])
 def test_search_doi_regex_efficacy(unstructured_citation, expected_result):
     p = Refine(unstructured_citation)
-    assert p.doi == expected_result
-
-
-class DummyParser():
-    def __init__(self, unstructured_citation):
-        self.unstructured_citation = unstructured_citation
-        self.doi = None
+    assert p.cit.doi == expected_result
 
 
 def test_get_citation():
-    p = DummyParser(None)
-    assert Refine.get_citation(p) == Citation()
+    p = Refine("Foo Bar")
+    assert p.get_citation() == Citation("Foo Bar")
 
 
 def test_citation_init():
@@ -96,3 +94,25 @@ def test_citation_init_no_args():
     assert c.url is None
     assert c.publication_date is None
     assert c.retrieval_date is None
+
+
+def test_citation_process_doi():
+    c = Citation()
+    c.process_doi("10.123/123")
+
+    assert c.doi == "10.123/123"
+    assert c.doi_url == "https://doi.org/10.123/123"
+
+
+def test_citation_process_doi_none_input():
+    c = Citation()
+    c.process_doi(None)
+
+    assert c.doi is None
+    assert c.doi_url is None
+
+
+def test_citation_process_doi_no_input():
+    with pytest.raises(TypeError):
+        c = Citation()
+        c.process_doi()

@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from munch import Munch
 import pytest
+from urllib.parse import urljoin
 
 from refine import Citation
 from repository import Thoth
@@ -124,7 +125,7 @@ def test_resolve_identifier_w_empty_input():
 
 @pytest.mark.parametrize("work_id, reference_ordinal, doi, "
                          "unstructured_citation",
-                         [["1234", 1, "Foo Bar", "10.11647/OBP.0322"]])
+                         [["1234", 1, "10.11647/OBP.0322", "Foo Bar"]])
 def test_write_record(work_id, reference_ordinal,
                       doi, unstructured_citation):
     class MockClient:
@@ -134,11 +135,13 @@ def test_write_record(work_id, reference_ordinal,
     rep = Thoth()
     rep.identifier = work_id
     rep.client = MockClient()
-    rep.write_record(Citation(unstructured_citation, doi), reference_ordinal)
+    c = Citation(unstructured_citation=unstructured_citation,
+                 doi=doi, doi_url=urljoin("https://doi.org/", doi))
+    rep.write_record(c, reference_ordinal)
 
     assert rep.client.reference["workId"] == work_id
     assert rep.client.reference["referenceOrdinal"] == reference_ordinal
-    assert rep.client.reference["doi"] == "https://doi.org/" + doi
+    assert rep.client.reference["doi"] == urljoin("https://doi.org/", doi)
     assert rep.client.reference["unstructuredCitation"] \
         is unstructured_citation
     assert rep.client.reference["issn"] is None

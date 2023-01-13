@@ -20,7 +20,7 @@ from urllib.parse import urljoin
 
 from thothlibrary import ThothClient
 
-from refine import Citation
+from .refine import Citation
 
 
 class Repository():
@@ -111,7 +111,7 @@ class Thoth(Repository):
         reference = {
             "workId":               self.identifier,
             "referenceOrdinal":     ordinal,
-            "doi":                  urljoin("https://doi.org/", citation.doi),
+            "doi":                  citation.doi_url,
             "unstructuredCitation": citation.unstructured_citation,
             "issn":                 citation.issn,
             "isbn":                 citation.isbn,

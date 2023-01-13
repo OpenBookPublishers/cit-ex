@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 import re
+from urllib.parse import urljoin
 
 
 @dataclass
 class Citation:
     unstructured_citation: str = None
     doi: str = None
+    doi_url: str = None
     reference_id: str = None
     work_id: str = None
     reference_ordinal: int = None
@@ -28,6 +30,14 @@ class Citation:
     publication_date: str = None
     retrieval_date: str = None
 
+    def process_doi(self, doi):
+        """Assign a value to self.doi and populate the self.doi_url field"""
+        self.doi = doi
+        if doi is None:
+            self.doi_url = None
+        else:
+            self.doi_url = urljoin("https://doi.org/", doi)
+
 
 class Refine():
     """Class to process unstructured citations.
@@ -38,20 +48,20 @@ class Refine():
              (i.e. could be replaced with a Citation method), but it is
              meant to be extended in the feature to allow retrival of
              additional (meta)data fields."""
-    def __init__(self, unstructured_citation: str = None) -> None:
-        self.unstructured_citation = unstructured_citation
-        self.doi = self._search_doi()
+    def __init__(self, unstructured_citation: str) -> None:
+        self.cit = Citation()
+        self.cit.unstructured_citation = unstructured_citation
+        self.cit.process_doi(self._search_doi(unstructured_citation))
 
-    def _search_doi(self) -> str:
+    def _search_doi(self, unstructured_citation: str) -> str:
         """Search the unstructured citation for a valid DOI and return it"""
         # Syntax of a DOI https://www.doi.org/doi_handbook/2_Numbering.html#2.2
         doi_regex = r"(10\.\d{3,6}\/\S*)"
-        result = re.search(doi_regex, self.unstructured_citation)
+        result = re.search(doi_regex, unstructured_citation)
         if result:
             return result.group()
         return None
 
     def get_citation(self) -> Citation:
-        """Return a Citation object with the data gathered with the Refine"""
-        return Citation(unstructured_citation=self.unstructured_citation,
-                        doi=self.doi)
+        """Return a Citation object with the data gathered"""
+        return self.cit
