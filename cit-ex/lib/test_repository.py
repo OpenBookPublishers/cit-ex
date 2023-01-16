@@ -74,4 +74,4 @@ def test_validate_credentials_bad_password(username, password):
 def test_repository_write_record():
     with pytest.raises(NotImplementedError):
         rep = Repository()
-        rep.write_record()
+        rep.write_record(None, 0)

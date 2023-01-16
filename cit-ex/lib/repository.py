@@ -20,8 +20,6 @@ from urllib.parse import urljoin
 
 from thothlibrary import ThothClient
 
-from .refine import Citation
-
 
 class Repository():
     """Base Repository class to derive specialised classes from to interface
@@ -53,8 +51,7 @@ class Repository():
         else:
             return True
 
-    def write_record(self, citation: Citation = None,
-                     ordinal: int = None) -> None:
+    def write_record(self, citation: any, ordinal: int) -> None:
         """Write a citation record"""
         raise NotImplementedError
 
@@ -66,7 +63,7 @@ class Thoth(Repository):
             self.client = ThothClient()
             self.client.login(self.username, self.password)
 
-    def resolve_identifier(self, identifier: str = None) -> None:
+    def resolve_identifier(self, identifier: str) -> None:
         """User would input either a DOI or a UUID from the CLI. This method
            figures out which one was given, in the case of DOI resolves it and
            finally stores the corresponding UUID in self.identifier.
@@ -77,12 +74,6 @@ class Thoth(Repository):
                 + 10.11647/obp.0288
             - UUID:
                 + cedb58f1-b88f-476c-b7c8-bc5869a2a6ba"""
-        if identifier is None:
-            raise ValueError("Empty value supplied for identifier")
-        elif type(identifier) != str:
-            raise TypeError(f"Invalid identifier type. '{type(identifier)}' "
-                            "supplied, expected a string.")
-
         doi_regex = re.compile(r"(10\.\d{3,6}\/\S*)")
         uuid_regex = re.compile(r"([a-f0-9]{8}-(?:[a-f0-9]{4}-){3}"
                                 r"[a-f0-9]{12})")
@@ -97,40 +88,35 @@ class Thoth(Repository):
             raise ValueError(f"Identifier not well formatted: '{identifier}'. "
                              "Expected a DOI or UUID")
 
-    def write_record(self, citation: Citation, ordinal: int) -> None:
+    def write_record(self, citation: any, ordinal: int) -> None:
         """Create the reference object and write it to the repository"""
-        args = [("citation", citation, Citation), ("ordinal", ordinal, int)]
-        for element, value, value_type in args:
-            if value is None:
-                raise ValueError(f"Please provide a {element}, none given.")
-            if not isinstance(value, value_type):
-                raise TypeError(f"Please provide a valid {element}. "
-                                f"'{type(value)}' offered, expected "
-                                f"{value_type}.")
-
-        reference = {
-            "workId":               self.identifier,
-            "referenceOrdinal":     ordinal,
-            "doi":                  citation.doi_url,
-            "unstructuredCitation": citation.unstructured_citation,
-            "issn":                 citation.issn,
-            "isbn":                 citation.isbn,
-            "journalTitle":         citation.journal_title,
-            "articleTitle":         citation.article_title,
-            "seriesTitle":          citation.series_title,
-            "volumeTitle":          citation.volume_title,
-            "edition":              citation.edition,
-            "author":               citation.author,
-            "volume":               citation.volume,
-            "issue":                citation.issue,
-            "firstPage":            citation.first_page,
-            "componentNumber":      citation.component_number,
-            "standardDesignator":   citation.standard_designator,
-            "standardsBodyName":    citation.standards_body_name,
-            "standardsBodyAcronym": citation.standards_body_acronym,
-            "url":                  citation.url,
-            "publicationDate":      citation.publication_date,
-            "retrievalDate":        citation.retrieval_date
-            }
-
-        self.client.create_reference(reference)
+        try:
+            reference = {
+                "workId":               self.identifier,
+                "referenceOrdinal":     ordinal,
+                "doi":                  citation.doi_url,
+                "unstructuredCitation": citation.unstructured_citation,
+                "issn":                 citation.issn,
+                "isbn":                 citation.isbn,
+                "journalTitle":         citation.journal_title,
+                "articleTitle":         citation.article_title,
+                "seriesTitle":          citation.series_title,
+                "volumeTitle":          citation.volume_title,
+                "edition":              citation.edition,
+                "author":               citation.author,
+                "volume":               citation.volume,
+                "issue":                citation.issue,
+                "firstPage":            citation.first_page,
+                "componentNumber":      citation.component_number,
+                "standardDesignator":   citation.standard_designator,
+                "standardsBodyName":    citation.standards_body_name,
+                "standardsBodyAcronym": citation.standards_body_acronym,
+                "url":                  citation.url,
+                "publicationDate":      citation.publication_date,
+                "retrievalDate":        citation.retrieval_date
+                }
+        except AttributeError as e:
+            raise TypeError(f"Please, provide a valid Citation object, "
+                            f"see:\n\n{e}")
+        else:
+            self.client.create_reference(reference)

@@ -165,22 +165,7 @@ def test_write_record(work_id, reference_ordinal,
 
 
 @pytest.mark.parametrize("work_id, reference_ordinal, citation",
-                         [["1234", 1, None],
-                          ["1234", None, Citation()]])
-def test_write_record_value_error(work_id, reference_ordinal, citation):
-    class MockClient:
-        def create_reference(self, reference):
-            self.reference = reference
-
-    with pytest.raises(ValueError):
-        rep = Thoth()
-        rep.identifier = work_id
-        rep.client = MockClient()
-        rep.write_record(citation, reference_ordinal)
-
-
-@pytest.mark.parametrize("work_id, reference_ordinal, citation",
-                         [["1234", [1], Citation()],
+                         [["1234", 1, [Citation()]],
                           ["1234", 1, {"citation": Citation()}]])
 def test_write_record_type_error(work_id, reference_ordinal, citation):
     class MockClient:
