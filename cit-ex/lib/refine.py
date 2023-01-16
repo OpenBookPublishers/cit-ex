@@ -33,9 +33,7 @@ class Citation:
     def process_doi(self, doi):
         """Assign a value to self.doi and populate the self.doi_url field"""
         self.doi = doi
-        if doi is None:
-            self.doi_url = None
-        else:
+        if doi is not None:
             self.doi_url = urljoin("https://doi.org/", doi)
 
 

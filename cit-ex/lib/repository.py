@@ -34,23 +34,6 @@ class Repository():
         """Init repository object"""
         raise NotImplementedError
 
-    def _validate_credentials(self) -> None:
-        """Method to check if the log in credentials are valid.
-           Specifically, this method checks that username and password
-           are (1) not None (default value assigned by Reposotory())
-           and (2) strings"""
-        credentials = [("username", self.username),
-                       ("password", self.password)]
-
-        for element, value in credentials:
-            if value is None:
-                raise ValueError(f"Please provide a {element}, none given.")
-            if type(value) != str:
-                raise TypeError(f"Please provide a valid {element}. "
-                                f"'{type(value)}' offered, expected str.")
-        else:
-            return True
-
     def write_record(self, citation: any, ordinal: int) -> None:
         """Write a citation record"""
         raise NotImplementedError
@@ -59,9 +42,8 @@ class Repository():
 class Thoth(Repository):
     """Class to interface with Thoth repository"""
     def init_connection(self) -> None:
-        if self._validate_credentials():
-            self.client = ThothClient()
-            self.client.login(self.username, self.password)
+        self.client = ThothClient()
+        self.client.login(self.username, self.password)
 
     def resolve_identifier(self, identifier: str) -> None:
         """User would input either a DOI or a UUID from the CLI. This method

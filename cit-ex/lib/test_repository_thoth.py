@@ -31,18 +31,10 @@ def test_thoth_init():
 
 def test_thoth_init_connection(mocker):
     rep = Thoth()
-    mocker.patch("repository.Thoth._validate_credentials", return_value=True)
     login = mocker.patch("repository.ThothClient.login")
     rep.init_connection()
 
     login.assert_called_once()
-
-
-def test_thoth_init_connection_w_bad_credentials(mocker):
-    rep = Thoth()
-    mocker.patch("repository.Thoth._validate_credentials", return_value=False)
-
-    assert rep.client is None
 
 
 def test_resolve_identifier_w_valid_doi():

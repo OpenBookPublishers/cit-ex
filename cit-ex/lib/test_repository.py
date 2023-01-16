@@ -49,28 +49,6 @@ def test_repository_init_connection():
         _ = Repository.init_connection("foobar")
 
 
-def test_validate_credentials_valid_username():
-    rep = Repository("Foo", "Bar")
-    assert Repository._validate_credentials(rep) is True
-
-
-@pytest.mark.parametrize("username, password",
-                         [[None, "bar"], ["foo", None]])
-def test_validate_credentials_bad_username(username, password):
-    with pytest.raises(ValueError, match=r"provide a (username|password)"):
-        rep = Repository(username, password)
-        rep._validate_credentials()
-
-
-@pytest.mark.parametrize("username, password",
-                         [[{"username": "Foo"}, "bar"],
-                          ["foo", {"password": "bar"}]])
-def test_validate_credentials_bad_password(username, password):
-    with pytest.raises(TypeError, match=r"a valid (username|password)"):
-        rep = Repository(username, password)
-        rep._validate_credentials()
-
-
 def test_repository_write_record():
     with pytest.raises(NotImplementedError):
         rep = Repository()
