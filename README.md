@@ -43,3 +43,16 @@ Given that these pre-requisites are satisfied and your identifier is _10.11647/O
 On top of the steps listed in "Installation", install the dev dependencies with:
 
 (.env) $ `python -m pip install -r requirements-dev.txt`
+
+## Extra packages
+
+### OBP loader
+The file `cit-ex/obp-loader.py` is an OBP-specific wrapper to load chapter-level citations to the repository (Thoth).
+
+It relies on each book chapter to report the URL of their HTML edition. This file is downloaded, embedded into an EPUB and finally run through _cit-ex_.
+
+The wrapper runs with:
+
+(.env) $ `python3 obp-loader.py 10.11647/obp.0085`
+
+where "10.11647/obp.0085" is the DOI of the book to be parsed.
