@@ -54,10 +54,10 @@ class Refine():
     def _search_doi(self, unstructured_citation: str) -> str:
         """Search the unstructured citation for a valid DOI and return it"""
         # Syntax of a DOI https://www.doi.org/doi_handbook/2_Numbering.html#2.2
-        doi_regex = r"(10\.\d{3,6}\/\S*)"
+        doi_regex = r"(10\.\d{3,6}\/\S*?)[,.;]?(?:\s|\Z)"
         result = re.search(doi_regex, unstructured_citation)
-        if result:
-            return result.group()
+        if result is not None:
+            return result.group(1)
         return None
 
     def get_citation(self) -> Citation:

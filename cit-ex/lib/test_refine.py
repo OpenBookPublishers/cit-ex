@@ -17,7 +17,11 @@ def test_refine_has_attributes():
                          ["https://doi.org/10.11647/OBP.0288",
                           "http://dx.doi.org/10.11647/OBP.0288",
                           "https://doi.org/10.11647/OBP.0288 FooBar",
-                          "FooBar https://doi.org/10.11647/OBP.0288"])
+                          "FooBar https://doi.org/10.11647/OBP.0288",
+                          "https://doi.org/10.11647/OBP.0288. FooBar",
+                          "https://doi.org/10.11647/OBP.0288, FooBar",
+                          "https://doi.org/10.11647/OBP.0288; FooBar",
+                          "https://doi.org/10.11647/OBP.0288."])
 def test_search_doi_w_good_input(unstructured_citation):
     p = Refine(unstructured_citation)
     assert p.cit.doi == "10.11647/OBP.0288"
