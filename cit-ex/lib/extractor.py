@@ -49,7 +49,7 @@ class Extractor:
         book_cit = []
         if html_class:
             for doc in self.docs:
-                soup = BeautifulSoup(doc.get_body_content(), "html.parser")
+                soup = BeautifulSoup(doc.get_body_content(), "lxml")
                 doc_cit = [c.get_text() for c in
                            soup.find_all(class_=html_class)]
                 book_cit.extend(doc_cit)

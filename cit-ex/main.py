@@ -38,7 +38,9 @@ def main():
                         help="HTML class(es) of the citation nodes. "
                              "This parameter accepts multiple values.")
     parser.add_argument("-r", "--repository", type=str, default="thoth",
-                        help="Name of the metadata repository. Default: thoth")
+                        const='thoth', nargs='?', choices=['thoth'],
+                        help="Name of the metadata repository. "
+                             "Default: %(default)s")
     parser.add_argument("-i", "--identifier", type=str, default=None,
                         help="Work identifier on the repository. Depending on "
                              "the repository, this could be a DOI or UUID.")
@@ -72,9 +74,6 @@ def main():
 
             for ordinal, citation in enumerate(citations, start=1):
                 rep.write_record(citation, ordinal)
-        else:
-            raise ValueError(f"The repository name '{args.repository}' "
-                             "is invalid or not implemented yet.")
 
 
 if __name__ == "__main__":  # pragma: no cover
