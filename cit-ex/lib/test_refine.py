@@ -22,7 +22,8 @@ def test_refine_has_attributes():
                           "https://doi.org/10.11647/OBP.0288, FooBar",
                           "https://doi.org/10.11647/OBP.0288; FooBar",
                           "https://doi.org/10.11647/OBP.0288."])
-def test_search_doi_w_good_input(unstructured_citation):
+def test_search_doi_w_good_input(unstructured_citation, mocker):
+    mocker.patch("refine.Refine.get_doi", return_value="10.11647/OBP.0288")
     p = Refine(unstructured_citation)
     assert p.cit.doi == "10.11647/OBP.0288"
 
@@ -51,9 +52,59 @@ def test_search_doi_w_empty_or_insufficient_input(unstructured_citation):
                           ["doi:10.11467/isss2003.7.1_11",
                            "10.11467/isss2003.7.1_11"]
                           ])
-def test_search_doi_regex_efficacy(unstructured_citation, expected_result):
+def test_search_doi_regex_efficacy(unstructured_citation,
+                                   expected_result, mocker):
+    mocker.patch("refine.Refine.get_doi", return_value=expected_result)
     p = Refine(unstructured_citation)
     assert p.cit.doi == expected_result
+
+
+def test_get_doi(mocker):
+    mocker.patch("refine.Refine._search_doi", return_value="10.11647/OBP.0288")
+    mocker.patch("refine.Refine._is_valid_doi", return_value=True)
+
+    p = Refine("dummy_unstructured_citation")
+    assert p.cit.doi == "10.11647/OBP.0288"
+
+
+def test_get_doi_doi_not_present_in_unstructured_citation(mocker):
+    mocker.patch("refine.Refine._search_doi", return_value=None)
+    mocker.patch("refine.Refine._is_valid_doi", return_value=False)
+
+    p = Refine("dummy_unstructured_citation")
+    assert p.cit.doi is None
+
+
+def test_get_doi_doi_present_in_unstructured_citation_but_invalid(mocker):
+    mocker.patch("refine.Refine._search_doi", return_value="dummy_doi")
+    mocker.patch("refine.Refine._is_valid_doi", return_value=False)
+
+    p = Refine("dummy_unstructured_citation")
+    assert p.cit.doi is None
+
+
+def test_is_valid_doi(mocker):
+    class MockGet:
+        status_code = 200
+
+    mocker.patch("refine.Refine.get_doi", return_value="dummy_doi")
+    mocker.patch("refine.urljoin", return_value="dummy_doi_url")
+    mocker.patch("refine.requests.get", return_value=MockGet())
+
+    p = Refine("dummy_unstructured_citation")
+    assert p._is_valid_doi("dummy_doi") is True
+
+
+def test_is_valid_doi_invalid_doi(mocker):
+    class MockGet:
+        status_code = 404
+
+    mocker.patch("refine.Refine.get_doi", return_value="dummy_doi")
+    mocker.patch("refine.urljoin", return_value="dummy_doi_url")
+    mocker.patch("refine.requests.get", return_value=MockGet())
+
+    p = Refine("dummy_unstructured_citation")
+    assert p._is_valid_doi("dummy_doi") is False
 
 
 def test_get_citation():

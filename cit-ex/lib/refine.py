@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import re
+import requests
 from urllib.parse import urljoin
 
 
@@ -49,7 +50,17 @@ class Refine():
     def __init__(self, unstructured_citation: str) -> None:
         self.cit = Citation()
         self.cit.unstructured_citation = unstructured_citation
-        self.cit.process_doi(self._search_doi(unstructured_citation))
+        self.cit.process_doi(self.get_doi(unstructured_citation))
+
+    def get_doi(self, unstructured_citation: str) -> str:
+        """This method finds and validates a DOI if present in the input
+           unstructured_citation string"""
+        parsed_doi = self._search_doi(unstructured_citation)
+
+        if parsed_doi is not None and self._is_valid_doi(parsed_doi):
+            return parsed_doi
+
+        return None
 
     def _search_doi(self, unstructured_citation: str) -> str:
         """Search the unstructured citation for a valid DOI and return it"""
@@ -59,6 +70,16 @@ class Refine():
         if result is not None:
             return result.group(1)
         return None
+
+    def _is_valid_doi(self, doi):
+        """This method tests whether a DOI is valid/exists"""
+        url = urljoin("https://doi.org/", doi)
+        r = requests.get(url, allow_redirects=True)
+
+        if r.status_code < 400:
+            return True
+
+        return False
 
     def get_citation(self) -> Citation:
         """Return a Citation object with the data gathered"""
