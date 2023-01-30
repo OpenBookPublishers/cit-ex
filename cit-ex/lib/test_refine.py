@@ -13,74 +13,34 @@ def test_refine_has_attributes():
     assert hasattr(p, "cit")
 
 
-@pytest.mark.parametrize("unstructured_citation",
-                         ["https://doi.org/10.11647/OBP.0288",
-                          "http://dx.doi.org/10.11647/OBP.0288",
-                          "https://doi.org/10.11647/OBP.0288 FooBar",
-                          "FooBar https://doi.org/10.11647/OBP.0288",
-                          "https://doi.org/10.11647/OBP.0288. FooBar",
-                          "https://doi.org/10.11647/OBP.0288, FooBar",
-                          "https://doi.org/10.11647/OBP.0288; FooBar",
-                          "https://doi.org/10.11647/OBP.0288."])
-def test_search_doi_w_good_input(unstructured_citation, mocker):
-    mocker.patch("refine.Refine.get_doi", return_value="10.11647/OBP.0288")
-    p = Refine(unstructured_citation)
-    assert p.cit.doi == "10.11647/OBP.0288"
-
-
-@pytest.mark.parametrize("unstructured_citation",
-                         ["",
-                          "FooBar",
-                          "https://doi.org/",
-                          "https://doi.org/10.1/OBP.0288",
-                          ])
-def test_search_doi_w_empty_or_insufficient_input(unstructured_citation):
-    p = Refine(unstructured_citation)
-    assert p.cit.doi is None
-
-
-# Examples sourced from https://www.doi.org/demos.html
 @pytest.mark.parametrize("unstructured_citation, expected_result",
-                         [["doi:10.1038/nphys1170",
-                           "10.1038/nphys1170"],
-                          ["doi:10.1002/0470841559.ch1",
-                           "10.1002/0470841559.ch1"],
-                          ["doi:10.1594/PANGAEA.726855",
-                           "10.1594/PANGAEA.726855"],
-                          ["doi:10.1594/GFZ.GEOFON.gfz2009kciu",
-                           "10.1594/GFZ.GEOFON.gfz2009kciu"],
-                          ["doi:10.11467/isss2003.7.1_11",
-                           "10.11467/isss2003.7.1_11"]
+                         [["https://doi.org/10.11647/OBP.0288",
+                           "10.11647/OBP.0288"],
+                          ["http://dx.doi.org/10.11647/OBP.0288",
+                           "10.11647/OBP.0288"],
+                          ["https://doi.org/10.11647/OBP.0288 FooBar",
+                           "10.11647/OBP.0288"],
+                          ["doi:10.11647/OBP.0288",
+                           "10.11647/OBP.0288"],
+                          ["https://doi.org/10.11647/OBP.0288. FooBar",
+                           "10.11647/OBP.0288"],
+                          ["https://doi.org/10.11647/OBP.0288. FooBar",
+                           "10.11647/OBP.0288"],
+                          ["https://doi.org/10.11647/OBP.0288, FooBar",
+                           "10.11647/OBP.0288"],
+                          ["https://doi.org/10.11647/OBP.0288; FooBar",
+                           "10.11647/OBP.0288"],
+                          ["https://doi.org/10.11647/OBP.0288.",
+                           "10.11647/OBP.0288"],
+                          ["http://dx.doi.org/10.2990/1471-5457(2005)24"
+                           "[2:tmpwac]2.0.co;2",
+                           "10.2990/1471-5457(2005)24[2:tmpwac]2.0.co;2"],
+                          ["", None],
+                          ["Foo Bar", None],
                           ])
-def test_search_doi_regex_efficacy(unstructured_citation,
-                                   expected_result, mocker):
-    mocker.patch("refine.Refine.get_doi", return_value=expected_result)
-    p = Refine(unstructured_citation)
-    assert p.cit.doi == expected_result
-
-
-def test_get_doi(mocker):
-    mocker.patch("refine.Refine._search_doi", return_value="10.11647/OBP.0288")
-    mocker.patch("refine.Refine._is_valid_doi", return_value=True)
-
-    p = Refine("dummy_unstructured_citation")
-    assert p.cit.doi == "10.11647/OBP.0288"
-
-
-def test_get_doi_doi_not_present_in_unstructured_citation(mocker):
-    mocker.patch("refine.Refine._search_doi", return_value=None)
-    mocker.patch("refine.Refine._is_valid_doi", return_value=False)
-
-    p = Refine("dummy_unstructured_citation")
-    assert p.cit.doi is None
-
-
-def test_get_doi_doi_present_in_unstructured_citation_but_invalid(mocker):
-    mocker.patch("refine.Refine._search_doi", return_value="dummy_doi")
-    mocker.patch("refine.Refine._is_valid_doi", return_value=False)
-
-    p = Refine("dummy_unstructured_citation")
-    assert p.cit.doi is None
+def test_find_doi_match(unstructured_citation, expected_result):
+    doi = Refine.find_doi_match("", unstructured_citation)
+    assert doi == expected_result
 
 
 def test_is_valid_doi(mocker):

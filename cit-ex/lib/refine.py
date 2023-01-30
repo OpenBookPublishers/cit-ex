@@ -44,21 +44,9 @@ class Refine():
        The method get_citation returns a Citation object to (hopefully) ease
        further processing via dependency injection."""
     def __init__(self, unstructured_citation: str) -> None:
-        self.cit = Citation()
-        self.cit.unstructured_citation = unstructured_citation
-        self.cit.process_doi(self.get_doi(unstructured_citation))
+        self.cit = Citation(unstructured_citation=unstructured_citation)
 
-    def get_doi(self, unstructured_citation: str) -> str:
-        """This method finds and validates a DOI if present in the input
-           unstructured_citation string"""
-        parsed_doi = self._search_doi(unstructured_citation)
-
-        if parsed_doi is not None and self._is_valid_doi(parsed_doi):
-            return parsed_doi
-
-        return None
-
-    def _search_doi(self, unstructured_citation: str) -> str:
+    def find_doi_match(self, unstructured_citation: str) -> str:
         """Search the unstructured citation for a valid DOI and return it"""
         # Syntax of a DOI https://www.doi.org/doi_handbook/2_Numbering.html#2.2
         doi_regex = r"(10\.\d{3,6}\/\S*?)[,.;]?(?:\s|\Z)"

@@ -58,7 +58,13 @@ def main():
     # Process the unstructured citations and return Citation objects
     citations = []
     for c in unstr_citations:
-        citations.append(Refine(c).get_citation())
+        ref_cit = Refine(c)
+        doi = ref_cit.find_doi_match(c)
+        if doi and ref_cit._is_valid_doi(doi):
+            ref_cit.cit.process_doi(doi)
+        else:
+            pass  # TODO perform a bibliographic search
+        citations.append(ref_cit.get_citation())
 
     # If dry run, simply show citation data
     if args.dry_run:
