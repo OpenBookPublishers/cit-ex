@@ -84,24 +84,22 @@ def test_get_doi_doi_present_in_unstructured_citation_but_invalid(mocker):
 
 
 def test_is_valid_doi(mocker):
-    class MockGet:
-        status_code = 200
+    class MockWorks:
+        def doi(self, doi):
+            return {"DummyDoi": True}
 
-    mocker.patch("refine.Refine.get_doi", return_value="dummy_doi")
-    mocker.patch("refine.urljoin", return_value="dummy_doi_url")
-    mocker.patch("refine.requests.get", return_value=MockGet())
+    mocker.patch("refine.Works", return_value=MockWorks())
 
     p = Refine("dummy_unstructured_citation")
     assert p._is_valid_doi("dummy_doi") is True
 
 
 def test_is_valid_doi_invalid_doi(mocker):
-    class MockGet:
-        status_code = 404
+    class MockWorkss:
+        def doi(self, doi):
+            return None
 
-    mocker.patch("refine.Refine.get_doi", return_value="dummy_doi")
-    mocker.patch("refine.urljoin", return_value="dummy_doi_url")
-    mocker.patch("refine.requests.get", return_value=MockGet())
+    mocker.patch("refine.Works", return_value=MockWorkss())
 
     p = Refine("dummy_unstructured_citation")
     assert p._is_valid_doi("dummy_doi") is False

@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 import re
-import requests
 from urllib.parse import urljoin
+
+from crossref.restful import Works
 
 
 @dataclass
@@ -41,12 +42,7 @@ class Citation:
 class Refine():
     """Class to process unstructured citations.
        The method get_citation returns a Citation object to (hopefully) ease
-       further processing via dependency injection.
-
-       Note: this class makes little sense in the present state
-             (i.e. could be replaced with a Citation method), but it is
-             meant to be extended in the feature to allow retrival of
-             additional (meta)data fields."""
+       further processing via dependency injection."""
     def __init__(self, unstructured_citation: str) -> None:
         self.cit = Citation()
         self.cit.unstructured_citation = unstructured_citation
@@ -71,12 +67,12 @@ class Refine():
             return result.group(1)
         return None
 
-    def _is_valid_doi(self, doi):
+    def _is_valid_doi(self, doi: str) -> bool:
         """This method tests whether a DOI is valid/exists"""
-        url = urljoin("https://doi.org/", doi)
-        r = requests.get(url, allow_redirects=True)
+        works = Works()
+        r = works.doi(doi)
 
-        if r.status_code < 400:
+        if r is not None:
             return True
 
         return False
