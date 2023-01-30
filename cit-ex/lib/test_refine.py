@@ -11,6 +11,7 @@ def test_refine_no_argument():
 def test_refine_has_attributes():
     p = Refine("FooBar")
     assert hasattr(p, "cit")
+    assert hasattr(p, "work")
 
 
 @pytest.mark.parametrize("unstructured_citation, expected_result",
@@ -39,7 +40,8 @@ def test_refine_has_attributes():
                           ["Foo Bar", None],
                           ])
 def test_find_doi_match(unstructured_citation, expected_result):
-    doi = Refine.find_doi_match("", unstructured_citation)
+    p = Refine("dummy_unstructured_citation")
+    doi = p.find_doi_match(unstructured_citation)
     assert doi == expected_result
 
 

@@ -45,6 +45,7 @@ class Refine():
        further processing via dependency injection."""
     def __init__(self, unstructured_citation: str) -> None:
         self.cit = Citation(unstructured_citation=unstructured_citation)
+        self.work = None
 
     def find_doi_match(self, unstructured_citation: str) -> str:
         """Search the unstructured citation for a valid DOI and return it"""
@@ -57,12 +58,9 @@ class Refine():
 
     def _is_valid_doi(self, doi: str) -> bool:
         """This method tests whether a DOI is valid/exists"""
-        works = Works()
-        r = works.doi(doi)
-
-        if r is not None:
+        self.work = Works().doi(doi)
+        if self.work is not None:
             return True
-
         return False
 
     def get_citation(self) -> Citation:
