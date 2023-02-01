@@ -231,7 +231,71 @@ def test_process_chapter_volume_title(input_data, expected_result):
                           [{"type": "book-chapter"}, None],
                           [{"page": "1-2"}, None],
                           [{}, None]])
-def test_process_chapter_first_page(input_data, expected_result, mocker):
+def test_process_chapter_first_page(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.first_page == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "journal-article",
+                            "container-title": ["dummy"]}, "dummy"],
+                          [{"type": "journal-article"}, None],
+                          [{"container-title": "dummy"}, None],
+                          [{}, None]])
+def test_process_journal_journal_title(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.journal_title == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "journal-article",
+                            "title": ["dummy"]}, "dummy"],
+                          [{"type": "journal-article"}, None],
+                          [{"title": "dummy"}, None],
+                          [{}, None]])
+def test_process_journal_article_title(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.article_title == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "journal-article",
+                            "volume": "1"}, "1"],
+                          [{"type": "journal-article"}, None],
+                          [{"volume": "1"}, None],
+                          [{}, None]])
+def test_process_journal_volume(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.volume == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "journal-article",
+                            "issue": "1"}, "1"],
+                          [{"type": "journal-article"}, None],
+                          [{"issue": "1"}, None],
+                          [{}, None]])
+def test_process_journal_issue(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.issue == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "journal-article", "page": "1-2"}, "1"],
+                          [{"type": "journal-article"}, None],
+                          [{"page": "1-2"}, None],
+                          [{}, None]])
+def test_process_journal_first_page(input_data, expected_result):
     p = Refine("Foo Bar")
     p.work = input_data
     p.process_crossref_data()

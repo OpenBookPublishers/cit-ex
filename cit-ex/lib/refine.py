@@ -143,13 +143,32 @@ class Refine():
             except AttributeError:
                 pass
 
-        # TODO journals
-        # self.cit.journal_title = None
-        # self.cit.article_title = None
-        # self.cit.volume = None
-        # self.cit.issue = None
-        # self.cit.first_page = None
-        # self.cit.component_number = None
+        # if journal
+        elif self.work.get("type") == "journal-article":
+            # Journal title
+            try:
+                self.cit.journal_title = self.work.get(
+                                               "container-title", [])[-1]
+            except IndexError:
+                pass
+
+            # Article title
+            try:
+                self.cit.article_title = self.work.get("title", [])[0]
+            except IndexError:
+                pass
+
+            # Volume number
+            self.cit.volume = self.work.get("volume")
+
+            # Issue
+            self.cit.issue = self.work.get("issue")
+
+            # First page
+            try:
+                self.cit.first_page = self.work.get("page").split("-")[0]
+            except AttributeError:
+                pass
 
     def get_citation(self) -> Citation:
         """Return a Citation object with the data gathered"""
