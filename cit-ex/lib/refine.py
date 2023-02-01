@@ -20,7 +20,7 @@ class Citation:
     article_title: str = None
     series_title: str = None
     volume_title: str = None
-    edition: str = None
+    edition: int = None
     author: str = None
     volume: str = None
     issue: str = None
@@ -69,8 +69,7 @@ class Refine():
             the Citation object."""
 
         # DOI
-        self.cit.doi = self.work.get("DOI")
-        self.cit.doi_url = self.work.get("URL")
+        self.cit.process_doi(self.work.get("DOI"))
 
         # ISSN
         try:
@@ -86,12 +85,21 @@ class Refine():
 
         # ISBN
         try:
-            self.cit.isbn = self.work.get("isbn-type", [])[0].get("value")
+            isbn = self.work.get("isbn-type", [])[0].get("value")
         except IndexError:
             pass
+        else:
+            # if isbn comes without hypens
+            if len(isbn) == 13 and "-" not in isbn:
+                isbn_regex = r"(\d{3})(\d{1})(\d{3})(\d{5})(\d{1})"
+                isbn = re.sub(isbn_regex, '\\1-\\2-\\3-\\4-\\5', isbn)
+            self.cit.isbn = isbn
 
         # Edition
-        self.cit.edition = self.work.get("edition-number")
+        try:
+            self.cit.edition = int(self.work.get("edition-number"))
+        except TypeError:
+            pass
 
         # Authors
         authors = []
@@ -113,7 +121,7 @@ class Refine():
             pass
         else:
             date = datetime.datetime(*date_parts)
-            self.cit.publication_date = date.strftime("%Y-%m-%d %H:%M:%S")
+            self.cit.publication_date = date.strftime("%Y-%m-%d")
 
         # If book
         if self.work.get("type") in ["monograph", "edited-book"]:

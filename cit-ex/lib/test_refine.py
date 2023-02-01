@@ -70,9 +70,15 @@ def test_is_valid_doi_invalid_doi(mocker):
 @pytest.mark.parametrize("input_data, expected_result",
                          [[{"DOI": "10.123/123"}, "10.123/123"],
                           [{}, None]])
-def test_process_crossref_data_doi(input_data, expected_result):
+def test_process_crossref_data_doi(input_data, expected_result, mocker):
     p = Refine("Foo Bar")
     p.work = input_data
+
+    def mock_process(*args):
+        p.cit.doi = expected_result
+
+    mocker.patch("refine.Citation.process_doi", mock_process)
+
     p.process_crossref_data()
     assert p.cit.doi == expected_result
 
@@ -80,9 +86,15 @@ def test_process_crossref_data_doi(input_data, expected_result):
 @pytest.mark.parametrize("input_data, expected_result",
                          [[{"URL": "http://10.123/123"}, "http://10.123/123"],
                           [{}, None]])
-def test_process_crossref_data_doi_url(input_data, expected_result):
+def test_process_crossref_data_doi_url(input_data, expected_result, mocker):
     p = Refine("Foo Bar")
     p.work = input_data
+
+    def mock_process(*args):
+        p.cit.doi_url = expected_result
+
+    mocker.patch("refine.Citation.process_doi", mock_process)
+
     p.process_crossref_data()
     assert p.cit.doi_url == expected_result
 
@@ -114,12 +126,16 @@ def test_process_crossref_series_title(input_data, expected_result):
 
 
 @pytest.mark.parametrize("input_data, expected_result",
-                         [[{"isbn-type": [{"value": "123-123"}]}, "123-123"],
+                         [[{"isbn-type": [{"value": "123-1-231-23123-1"}]},
+                           "123-1-231-23123-1"],
+                          [{"isbn-type": [{"value": "1231231231231"}]},
+                           "123-1-231-23123-1"],
                           [{"isbn-type": []}, None],
                           [{"isbn-type": [{"value": "123-123"},
                                           {"value2": "456-456"}]}, "123-123"],
                           [{}, None]])
-def test_process_crossref_isbn(input_data, expected_result):
+def test_process_crossref_isbn(input_data, expected_result, mocker):
+    mocker.patch("refine.re.sub", return_value=expected_result)
     p = Refine("Foo Bar")
     p.work = input_data
     p.process_crossref_data()
@@ -127,7 +143,7 @@ def test_process_crossref_isbn(input_data, expected_result):
 
 
 @pytest.mark.parametrize("input_data, expected_result",
-                         [[{"edition-number": "3"}, "3"],
+                         [[{"edition-number": "3"}, 3],
                           [{}, None]])
 def test_process_crossref_edition_number(input_data, expected_result):
     p = Refine("Foo Bar")
