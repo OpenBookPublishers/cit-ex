@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import datetime
 import re
 from urllib.parse import urljoin
 
@@ -62,6 +63,93 @@ class Refine():
         if self.work is not None:
             return True
         return False
+
+    def process_crossref_data(self) -> None:
+        """"This method parses the result of crossref query and feeds into
+            the Citation object."""
+
+        # DOI
+        self.cit.doi = self.work.get("DOI")
+        self.cit.doi_url = self.work.get("URL")
+
+        # ISSN
+        try:
+            self.cit.issn = self.work.get("ISSN", [])[0]
+        except IndexError:
+            pass
+        else:  # if part of a series
+            # Series name
+            try:
+                self.cit.series_title = self.work.get("container-title", [])[0]
+            except IndexError:
+                pass
+
+        # ISBN
+        try:
+            self.cit.isbn = self.work.get("isbn-type", [])[0].get("value")
+        except IndexError:
+            pass
+
+        # Edition
+        self.cit.edition = self.work.get("edition-number")
+
+        # Authors
+        authors = []
+        for author in self.work.get("author", []):
+            given = author.get("given", "")
+            family = author.get("family", "")
+            authors.append(" ".join(filter(None, [given, family])))
+        if len(authors) > 0:
+            self.cit.author = "; ".join(authors)
+
+        # URL
+        self.cit.url = self.work.get("resource", {}).get("primary", {}) \
+                                .get("URL")
+
+        # Publication Date
+        try:
+            date_parts = self.work.get("issued", {}).get("date-parts", [])[0]
+        except IndexError:
+            pass
+        else:
+            date = datetime.datetime(*date_parts)
+            self.cit.publication_date = date.strftime("%Y-%m-%d %H:%M:%S")
+
+        # If book
+        if self.work.get("type") in ["monograph", "edited-book"]:
+            try:
+                self.cit.volume_title = self.work.get("title", [])[0]
+            except IndexError:
+                pass
+
+        # If book chapter
+        elif self.work.get("type") == "book-chapter":
+            # Chapter title
+            try:
+                self.cit.article_title = self.work.get("title", [])[0]
+            except IndexError:
+                pass
+
+            # Book (container) title
+            try:
+                self.cit.volume_title = self.work.get(
+                                               "container-title", [])[-1]
+            except IndexError:
+                pass
+
+            # First page
+            try:
+                self.cit.first_page = self.work.get("page").split("-")[0]
+            except AttributeError:
+                pass
+
+        # TODO journals
+        # self.cit.journal_title = None
+        # self.cit.article_title = None
+        # self.cit.volume = None
+        # self.cit.issue = None
+        # self.cit.first_page = None
+        # self.cit.component_number = None
 
     def get_citation(self) -> Citation:
         """Return a Citation object with the data gathered"""

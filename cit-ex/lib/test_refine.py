@@ -67,6 +67,177 @@ def test_is_valid_doi_invalid_doi(mocker):
     assert p._is_valid_doi("dummy_doi") is False
 
 
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"DOI": "10.123/123"}, "10.123/123"],
+                          [{}, None]])
+def test_process_crossref_data_doi(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.doi == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"URL": "http://10.123/123"}, "http://10.123/123"],
+                          [{}, None]])
+def test_process_crossref_data_doi_url(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.doi_url == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"ISSN": ["123-123"]}, "123-123"],
+                          [{"ISSN": []}, None],
+                          [{}, None]])
+def test_process_crossref_data_issn(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.issn == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"ISSN": "123-123", "container-title": ["Foo Bar"]},
+                           "Foo Bar"],
+                          [{"ISSN": "123-123", "container-title": []},
+                           None],
+                          [{"ISSN": "123-123"}, None],
+                          [{"container-title": ["Foo Bar"]}, None],
+                          [{}, None]])
+def test_process_crossref_series_title(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.series_title == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"isbn-type": [{"value": "123-123"}]}, "123-123"],
+                          [{"isbn-type": []}, None],
+                          [{"isbn-type": [{"value": "123-123"},
+                                          {"value2": "456-456"}]}, "123-123"],
+                          [{}, None]])
+def test_process_crossref_isbn(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.isbn == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"edition-number": "3"}, "3"],
+                          [{}, None]])
+def test_process_crossref_edition_number(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.edition == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"author": [{"given": "a", "family": "b"}]}, "a b"],
+                          [{"author": [{"given": "a"}]}, "a"],
+                          [{"author": [{"family": "b"}]}, "b"],
+                          [{"author": [{"given": "a", "family": "b"},
+                                       {"given": "c", "family": "d"}]},
+                           "a b; c d"],
+                          [{"author": []}, None],
+                          [{}, None]])
+def test_process_crossref_author(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.author == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"resource": {"primary": {"URL": "http"}}}, "http"],
+                          [{"resource": {"primary": {}}}, None],
+                          [{"resource": {}}, None],
+                          [{}, None]])
+def test_process_crossref_url(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.url == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"issued": {"date-parts": [[1, 2, 3]]}}, "dummy"],
+                          [{"issued": {"date-parts": []}}, None],
+                          [{"issued": {}}, None],
+                          [{}, None]])
+def test_process_publication_date(input_data, expected_result, mocker):
+    class MockDatetime():
+        def strftime(self, args):
+            return "dummy"
+
+    mocker.patch("refine.datetime.datetime", return_value=MockDatetime())
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.publication_date == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "monograph", "title": ["dummy"]}, "dummy"],
+                          [{"type": "edited-book", "title": ["dummy"]},
+                           "dummy"],
+                          [{"type": "monograph"}, None],
+                          [{"title": ["dummy"]}, None],
+                          [{}, None]])
+def test_process_book_volume_title(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.volume_title == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "book-chapter", "title": ["dummy"]},
+                          "dummy"],
+                          [{"type": "book-chapter", "title": []}, None],
+                          [{"type": "book-chapter"}, None],
+                          [{"title": []}, None],
+                          [{}, None]])
+def test_process_chapter_article_title(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.article_title == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "book-chapter",
+                            "container-title": ["dummy"]}, "dummy"],
+                          [{"type": "book-chapter",
+                            "container-title": ["", "dummy"]}, "dummy"],
+                          [{"type": "book-chapter",
+                            "container-title": []}, None],
+                          [{"type": "book-chapter"}, None],
+                          [{"container-title": ["dummy"]}, None],
+                          [{}, None]])
+def test_process_chapter_volume_title(input_data, expected_result):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.volume_title == expected_result
+
+
+@pytest.mark.parametrize("input_data, expected_result",
+                         [[{"type": "book-chapter", "page": "1-2"}, "1"],
+                          [{"type": "book-chapter"}, None],
+                          [{"page": "1-2"}, None],
+                          [{}, None]])
+def test_process_chapter_first_page(input_data, expected_result, mocker):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.first_page == expected_result
+
+
 def test_get_citation():
     p = Refine("Foo Bar")
     assert p.get_citation() == Citation("Foo Bar")
