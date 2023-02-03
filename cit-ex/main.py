@@ -58,12 +58,14 @@ def main():
     # Process the unstructured citations and return Citation objects
     citations = []
     for c in unstr_citations:
-        ref_cit = Refine(c)
-        doi = ref_cit.find_doi_match(c)
-        if doi and ref_cit._is_valid_doi(doi):
+        doi = Refine.find_doi_match(c)
+        ref_cit = Refine(unstructured_citation=c, doi=doi)
+
+        if doi and ref_cit._is_valid_doi():
             ref_cit.process_crossref_data()
         else:
             pass  # TODO perform a bibliographic search
+
         citations.append(ref_cit.get_citation())
 
     # If dry run, simply show citation data

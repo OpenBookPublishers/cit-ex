@@ -8,6 +8,21 @@ def test_refine_no_argument():
         _ = Refine()
 
 
+def test_refine_w_doi(mocker):
+    class MockWorks:
+        def doi(self, doi):
+            return {"DummyDoi": True}
+
+    mocker.patch("refine.Works", return_value=MockWorks())
+    p = Refine("FooBar", "dummy_doi")
+    assert p.work is not None
+
+
+def test_refine_no_doi():
+    p = Refine("FooBar")
+    assert p.work is None
+
+
 def test_refine_has_attributes():
     p = Refine("FooBar")
     assert hasattr(p, "cit")
@@ -40,8 +55,7 @@ def test_refine_has_attributes():
                           ["Foo Bar", None],
                           ])
 def test_find_doi_match(unstructured_citation, expected_result):
-    p = Refine("dummy_unstructured_citation")
-    doi = p.find_doi_match(unstructured_citation)
+    doi = Refine.find_doi_match(unstructured_citation)
     assert doi == expected_result
 
 
@@ -52,8 +66,8 @@ def test_is_valid_doi(mocker):
 
     mocker.patch("refine.Works", return_value=MockWorks())
 
-    p = Refine("dummy_unstructured_citation")
-    assert p._is_valid_doi("dummy_doi") is True
+    p = Refine("dummy_unstructured_citation", "dummy_doi")
+    assert p._is_valid_doi() is True
 
 
 def test_is_valid_doi_invalid_doi(mocker):
@@ -64,7 +78,7 @@ def test_is_valid_doi_invalid_doi(mocker):
     mocker.patch("refine.Works", return_value=MockWorkss())
 
     p = Refine("dummy_unstructured_citation")
-    assert p._is_valid_doi("dummy_doi") is False
+    assert p._is_valid_doi() is False
 
 
 @pytest.mark.parametrize("input_data, expected_result",

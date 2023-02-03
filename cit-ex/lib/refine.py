@@ -44,11 +44,16 @@ class Refine():
     """Class to process unstructured citations.
        The method get_citation returns a Citation object to (hopefully) ease
        further processing via dependency injection."""
-    def __init__(self, unstructured_citation: str) -> None:
+    def __init__(self, unstructured_citation: str, doi: str = None) -> None:
         self.cit = Citation(unstructured_citation=unstructured_citation)
-        self.work = None
 
-    def find_doi_match(self, unstructured_citation: str) -> str:
+        if doi is None:
+            self.work = None
+        else:
+            self.work = Works().doi(doi)
+
+    @staticmethod
+    def find_doi_match(unstructured_citation: str) -> str:
         """Search the unstructured citation for a valid DOI and return it"""
         # Syntax of a DOI https://www.doi.org/doi_handbook/2_Numbering.html#2.2
         doi_regex = r"(10\.\d{3,6}\/\S*?)[,.;]?(?:\s|\Z)"
@@ -57,9 +62,8 @@ class Refine():
             return result.group(1)
         return None
 
-    def _is_valid_doi(self, doi: str) -> bool:
+    def _is_valid_doi(self) -> bool:
         """This method tests whether a DOI is valid/exists"""
-        self.work = Works().doi(doi)
         if self.work is not None:
             return True
         return False
