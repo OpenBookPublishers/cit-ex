@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 import datetime
 import re
+import requests
 from urllib.parse import urljoin
 
-from crossref.restful import Works
+import backoff
+from crossref.restful import Works, Etiquette
 
 
 @dataclass
@@ -44,11 +46,19 @@ class Refine():
     """Class to process unstructured citations.
        The method get_citation returns a Citation object to (hopefully) ease
        further processing via dependency injection."""
-    def __init__(self, unstructured_citation: str) -> None:
+    def __init__(self, unstructured_citation: str, doi: str = None,
+                 email: str = "no-email@offered.org") -> None:
         self.cit = Citation(unstructured_citation=unstructured_citation)
-        self.work = None
 
-    def find_doi_match(self, unstructured_citation: str) -> str:
+        self.work = None
+        if doi is not None:
+            try:
+                self.work = self._get_work_by_doi(doi, email)
+            except requests.exceptions.HTTPError:
+                pass
+
+    @staticmethod
+    def find_doi_match(unstructured_citation: str) -> str:
         """Search the unstructured citation for a valid DOI and return it"""
         # Syntax of a DOI https://www.doi.org/doi_handbook/2_Numbering.html#2.2
         doi_regex = r"(10\.\d{3,6}\/\S*?)[,.;]?(?:\s|\Z)"
@@ -57,9 +67,18 @@ class Refine():
             return result.group(1)
         return None
 
-    def _is_valid_doi(self, doi: str) -> bool:
+    @backoff.on_exception(backoff.expo,
+                          requests.exceptions.HTTPError,
+                          max_time=60, max_tries=3)
+    def _get_work_by_doi(self, doi: str, email: str) -> dict:
+        """This method queries Crossref and returns a dictionary with
+           the result"""
+        my_etiquette = Etiquette('cit-ex', '0.0.2', 'https://github.com/'
+                                 'OpenBookPublishers/cit-ex', email)
+        return Works(etiquette=my_etiquette).doi(doi)
+
+    def _is_valid_doi(self) -> bool:
         """This method tests whether a DOI is valid/exists"""
-        self.work = Works().doi(doi)
         if self.work is not None:
             return True
         return False
