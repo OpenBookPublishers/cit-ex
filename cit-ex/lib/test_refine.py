@@ -13,7 +13,11 @@ def test_refine_w_doi(mocker):
         def doi(self, doi):
             return {"DummyDoi": True}
 
+    class MockEtiquette:
+        pass
+
     mocker.patch("refine.Works", return_value=MockWorks())
+    mocker.patch("refine.Etiquette", return_value=MockEtiquette())
     p = Refine("FooBar", "dummy_doi")
     assert p.work is not None
 

@@ -3,7 +3,7 @@ import datetime
 import re
 from urllib.parse import urljoin
 
-from crossref.restful import Works
+from crossref.restful import Works, Etiquette
 
 
 @dataclass
@@ -44,13 +44,16 @@ class Refine():
     """Class to process unstructured citations.
        The method get_citation returns a Citation object to (hopefully) ease
        further processing via dependency injection."""
-    def __init__(self, unstructured_citation: str, doi: str = None) -> None:
+    def __init__(self, unstructured_citation: str, doi: str = None,
+                 email: str = "no-email@offered.org") -> None:
         self.cit = Citation(unstructured_citation=unstructured_citation)
 
         if doi is None:
             self.work = None
         else:
-            self.work = Works().doi(doi)
+            my_etiquette = Etiquette('cit-ex', '0.0.2', 'https://github.com/'
+                                     'OpenBookPublishers/cit-ex', email)
+            self.work = Works(etiquette=my_etiquette).doi(doi)
 
     @staticmethod
     def find_doi_match(unstructured_citation: str) -> str:

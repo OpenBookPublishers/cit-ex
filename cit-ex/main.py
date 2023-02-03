@@ -59,7 +59,8 @@ def main():
     citations = []
     for c in unstr_citations:
         doi = Refine.find_doi_match(c)
-        ref_cit = Refine(unstructured_citation=c, doi=doi)
+        ref_cit = Refine(unstructured_citation=c, doi=doi,
+                         email=getenv('THOTH_EMAIL'))
 
         if doi and ref_cit._is_valid_doi():
             ref_cit.process_crossref_data()
