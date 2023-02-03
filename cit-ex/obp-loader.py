@@ -39,10 +39,14 @@ def main():
     chapters = get_chapters(query)
 
     # add bibliography section (if any) to chapter list
-    bib_url = urljoin(chapters[0].get("html_page"), "bibliography.xhtml")
-    r = requests.get(bib_url)
-    if r.status_code == 200:
-        chapters.append({"doi": args.doi, "html_page": bib_url})
+    try:
+        bib_url = urljoin(chapters[0].get("html_page"), "bibliography.xhtml")
+    except IndexError:
+        pass
+    else:
+        r = requests.get(bib_url)
+        if r.status_code == 200:
+            chapters.append({"doi": args.doi, "html_page": bib_url})
 
     # create an epub for each chapter and run it through cit-ex
     for chapter in chapters:
