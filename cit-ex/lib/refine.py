@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 import datetime
 import re
+import requests
 from urllib.parse import urljoin
 
+import backoff
 from crossref.restful import Works, Etiquette
 
 
@@ -48,12 +50,12 @@ class Refine():
                  email: str = "no-email@offered.org") -> None:
         self.cit = Citation(unstructured_citation=unstructured_citation)
 
-        if doi is None:
-            self.work = None
-        else:
-            my_etiquette = Etiquette('cit-ex', '0.0.2', 'https://github.com/'
-                                     'OpenBookPublishers/cit-ex', email)
-            self.work = Works(etiquette=my_etiquette).doi(doi)
+        self.work = None
+        if doi is not None:
+            try:
+                self.work = self._get_work_by_doi(doi, email)
+            except requests.exceptions.HTTPError:
+                pass
 
     @staticmethod
     def find_doi_match(unstructured_citation: str) -> str:
@@ -64,6 +66,16 @@ class Refine():
         if result is not None:
             return result.group(1)
         return None
+
+    @backoff.on_exception(backoff.expo,
+                          requests.exceptions.HTTPError,
+                          max_time=60, max_tries=3)
+    def _get_work_by_doi(self, doi: str, email: str) -> dict:
+        """This method queries Crossref and returns a dictionary with
+           the result"""
+        my_etiquette = Etiquette('cit-ex', '0.0.2', 'https://github.com/'
+                                 'OpenBookPublishers/cit-ex', email)
+        return Works(etiquette=my_etiquette).doi(doi)
 
     def _is_valid_doi(self) -> bool:
         """This method tests whether a DOI is valid/exists"""

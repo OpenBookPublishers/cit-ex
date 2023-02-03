@@ -9,6 +9,20 @@ def test_refine_no_argument():
 
 
 def test_refine_w_doi(mocker):
+    mocker.patch("refine.Refine._get_work_by_doi", return_value=True)
+    p = Refine("FooBar", "dummy_doi")
+    assert p.work is True
+
+
+def test_refine_w_doi_HTTP_error(mocker):
+    mocker.patch("refine.Refine._get_work_by_doi",
+                 side_effect=Exception('HTTPError'))
+    with pytest.raises(Exception):
+        p = Refine("FooBar", "dummy_doi")
+        assert p.work is None
+
+
+def test_get_work_by_doi(mocker):
     class MockWorks:
         def doi(self, doi):
             return {"DummyDoi": True}
@@ -64,12 +78,7 @@ def test_find_doi_match(unstructured_citation, expected_result):
 
 
 def test_is_valid_doi(mocker):
-    class MockWorks:
-        def doi(self, doi):
-            return {"DummyDoi": True}
-
-    mocker.patch("refine.Works", return_value=MockWorks())
-
+    mocker.patch("refine.Refine._get_work_by_doi", return_value=True)
     p = Refine("dummy_unstructured_citation", "dummy_doi")
     assert p._is_valid_doi() is True
 
