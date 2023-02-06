@@ -24,6 +24,8 @@ from lib.extractor import Extractor
 from lib.refine import Refine
 from lib.repository import Thoth
 
+from progress.bar import Bar
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -52,11 +54,15 @@ def main():
     # Extract unstructured citations from EPUB
     ex = Extractor(args.epub.name)
     unstr_citations = []
+    bar = Bar("Extract the citations", max=len(args.classes))
     for class_ in args.classes:
         unstr_citations.extend(ex.exctract_cit(class_))
+        bar.next()
+    bar.finish()
 
     # Process the unstructured citations and return Citation objects
     citations = []
+    bar = Bar("Process the citations", max=len(unstr_citations))
     for c in unstr_citations:
         doi = Refine.find_doi_match(c)
         ref_cit = Refine(unstructured_citation=c, doi=doi,
@@ -68,6 +74,8 @@ def main():
             pass  # TODO perform a bibliographic search
 
         citations.append(ref_cit.get_citation())
+        bar.next()
+    bar.finish()
 
     # If dry run, simply show citation data
     if args.dry_run:
@@ -81,8 +89,11 @@ def main():
             rep.init_connection()
             rep.resolve_identifier(args.identifier)
 
+            bar = Bar("Write to repository", max=len(citations))
             for ordinal, citation in enumerate(citations, start=1):
                 rep.write_record(citation, ordinal)
+                bar.next()
+            bar.finish()
 
 
 if __name__ == "__main__":  # pragma: no cover
