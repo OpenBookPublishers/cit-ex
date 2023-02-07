@@ -157,9 +157,11 @@ def test_process_crossref_series_title(input_data, expected_result):
                            "123-1-231-23123-1"],
                           [{"isbn-type": [{"value": "1231231231231"}]},
                            "123-1-231-23123-1"],
+                          [{"isbn-type": [{"value": "123-1-231-23123-1"},
+                                          {"value2": "123-1-231-23123-2"}]},
+                           "123-1-231-23123-1"],
                           [{"isbn-type": []}, None],
-                          [{"isbn-type": [{"value": "123-123"},
-                                          {"value2": "456-456"}]}, "123-123"],
+                          [{"isbn-type": [{"value": "123-1"}]}, None],
                           [{}, None]])
 def test_process_crossref_isbn(input_data, expected_result, mocker):
     mocker.patch("refine.re.sub", return_value=expected_result)
@@ -171,6 +173,8 @@ def test_process_crossref_isbn(input_data, expected_result, mocker):
 
 @pytest.mark.parametrize("input_data, expected_result",
                          [[{"edition-number": "3"}, 3],
+                          [{"edition-number": "0"}, None],
+                          [{"edition-number": "-1"}, None],
                           [{}, None]])
 def test_process_crossref_edition_number(input_data, expected_result):
     p = Refine("Foo Bar")
@@ -222,6 +226,18 @@ def test_process_publication_date(input_data, expected_result, mocker):
     p.work = input_data
     p.process_crossref_data()
     assert p.cit.publication_date == expected_result
+
+
+@pytest.mark.parametrize("input_data",
+                         [{"issued": {"date-parts": [[1900, 1, 1]]}},
+                          {"issued": {"date-parts": [[1900, 1]]}},
+                          {"issued": {"date-parts": [[1900]]}}
+                          ])
+def test_process_publication_date_missing_parts(input_data, mocker):
+    p = Refine("Foo Bar")
+    p.work = input_data
+    p.process_crossref_data()
+    assert p.cit.publication_date == "1900-01-01"
 
 
 @pytest.mark.parametrize("input_data, expected_result",

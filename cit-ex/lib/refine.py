@@ -103,22 +103,25 @@ class Refine():
                 pass
 
         # ISBN
-        try:
-            isbn = self.work.get("isbn-type", [])[0].get("value")
-        except IndexError:
-            pass
-        else:
-            # if isbn comes without hypens
-            if len(isbn) == 13 and "-" not in isbn:
-                isbn_regex = r"(\d{3})(\d{1})(\d{3})(\d{5})(\d{1})"
-                isbn = re.sub(isbn_regex, '\\1-\\2-\\3-\\4-\\5', isbn)
-            self.cit.isbn = isbn
+        for entry in self.work.get("isbn-type", []):
+            if len(entry.get("value")) > 10:
+                isbn = entry.get("value")
+
+                # if isbn comes without hypens
+                if len(isbn) == 13 and "-" not in isbn:
+                    isbn_regex = r"(\d{3})(\d{1})(\d{3})(\d{5})(\d{1})"
+                    isbn = re.sub(isbn_regex, '\\1-\\2-\\3-\\4-\\5', isbn)
+                self.cit.isbn = isbn
+                break
 
         # Edition
         try:
-            self.cit.edition = int(self.work.get("edition-number"))
+            edition = int(self.work.get("edition-number"))
         except TypeError:
             pass
+        else:
+            if edition > 0:
+                self.cit.edition = edition
 
         # Authors
         authors = []
@@ -139,7 +142,13 @@ class Refine():
         except IndexError:
             pass
         else:
-            date = datetime.datetime(*date_parts)
+            # sometimes dates are incomplete, i.e. [1900] or [1900, 5]
+            # and it should be safe to default missing values to 1
+            date_dict = {i: v for i, v in zip(["year", "month", "day"],
+                                              date_parts)}
+            date = datetime.datetime(date_dict.get("year"),
+                                     date_dict.get("month", 1),
+                                     date_dict.get("day", 1))
             self.cit.publication_date = date.strftime("%Y-%m-%d")
 
         # If book
