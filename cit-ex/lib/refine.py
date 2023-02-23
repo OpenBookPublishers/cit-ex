@@ -95,7 +95,10 @@ class Refine():
             self.cit.issn = self.work.get("ISSN", [])[0]
         except IndexError:
             pass
-        else:  # if part of a series
+
+        if self.cit.issn is not None \
+           and self.work.get("type") in ["monograph", "edited-book",
+                                         "book-chapter"]:
             # Series name
             try:
                 self.cit.series_title = self.work.get("container-title", [])[0]
