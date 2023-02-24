@@ -83,29 +83,24 @@ class Refine():
             return True
         return False
 
-    def process_crossref_data(self) -> None:
-        """"This method parses the result of crossref query and feeds into
-            the Citation object."""
-
-        # DOI
-        self.cit.process_doi(self.work.get("DOI"))
-
-        # ISSN
+    def get_issn(self) -> str:
+        """Get ISSN from self.work"""
         try:
-            self.cit.issn = self.work.get("ISSN", [])[0]
+            return self.work.get("ISSN", [])[0]
         except IndexError:
-            pass
+            return None
 
-        if self.cit.issn is not None \
-           and self.work.get("type") in ["monograph", "edited-book",
-                                         "book-chapter"]:
-            # Series name
+    def get_series_title(self) -> str:
+        """Get series title from self.work"""
+        if self.cit.issn is not None:
             try:
-                self.cit.series_title = self.work.get("container-title", [])[0]
+                return self.work.get("container-title", [])[0]
             except IndexError:
-                pass
+                return None
 
-        # ISBN
+    def get_isbn(self) -> str:
+        """Get ISBN from self.work"""
+        isbn = None
         for entry in self.work.get("isbn-type", []):
             if len(entry.get("value")) > 10:
                 isbn = entry.get("value")
@@ -114,100 +109,126 @@ class Refine():
                 if len(isbn) == 13 and "-" not in isbn:
                     isbn_regex = r"(\d{3})(\d{1})(\d{3})(\d{5})(\d{1})"
                     isbn = re.sub(isbn_regex, '\\1-\\2-\\3-\\4-\\5', isbn)
-                self.cit.isbn = isbn
                 break
 
-        # Edition
+        return isbn
+
+    def get_edition(self) -> int:
+        """Get edition number from self.work"""
+        edition = 0
         try:
             edition = int(self.work.get("edition-number"))
         except TypeError:
             pass
-        else:
-            if edition > 0:
-                self.cit.edition = edition
 
-        # Authors
+        return edition if edition > 0 else None
+
+    def get_authors(self) -> str:
+        """Get authors from self.work"""
         authors = []
         for author in self.work.get("author", []):
             given = author.get("given", "")
             family = author.get("family", "")
             authors.append(" ".join(filter(None, [given, family])))
+
         if len(authors) > 0:
-            self.cit.author = "; ".join(authors)
+            return "; ".join(authors)
+        else:
+            return None
 
-        # URL
-        self.cit.url = self.work.get("resource", {}).get("primary", {}) \
-                                .get("URL")
+    def get_url(self) -> str:
+        """Get URL from self.work"""
+        return self.work.get("resource", {}).get("primary", {}) \
+                        .get("URL")
 
-        # Publication Date
+    def get_publication_date(self) -> str:
+        """Get publication date from self.work"""
         try:
             date_parts = self.work.get("issued", {}).get("date-parts", [])[0]
         except IndexError:
-            pass
+            return None
         else:
             # sometimes dates are incomplete, i.e. [1900] or [1900, 5]
-            # and it should be safe to default missing values to 1
+            # and it is considered safe to default missing values to 1
             date_dict = {i: v for i, v in zip(["year", "month", "day"],
                                               date_parts)}
             date = datetime.datetime(date_dict.get("year"),
                                      date_dict.get("month", 1),
                                      date_dict.get("day", 1))
-            self.cit.publication_date = date.strftime("%Y-%m-%d")
+            return date.strftime("%Y-%m-%d")
 
-        # If book
+    def get_title(self) -> str:
+        """Get title from self.work."""
+        try:
+            return self.work.get("title", [])[0]
+        except IndexError:
+            return None
+
+    def get_container_title(self) -> str:
+        """Get name of the book or journal from self.work.
+           Used for book chapters and journal articles."""
+        try:
+            return self.work.get("container-title", [])[-1]
+        except IndexError:
+            return None
+
+    def get_first_page(self) -> str:
+        """Get first page of a book chapters and journal articles
+           from self.work."""
+        page_range = self.work.get("page")
+        if page_range is not None and \
+           "-" in page_range:
+            return page_range.split("-")[0]
+        else:
+            return None
+
+    def get_volume_number(self) -> int:
+        """Get volume number from self.work."""
+        volume = self.work.get("volume")
+        if isinstance(volume, str) and volume.isdigit():
+            return volume
+        elif isinstance(volume, int):
+            return str(volume)
+        else:
+            return None
+
+    def get_issue_number(self) -> str:
+        """Get issue number from self.work."""
+        issue = self.work.get("issue")
+        if isinstance(issue, str) and issue.isdigit():
+            return issue
+        elif isinstance(issue, int):
+            return str(issue)
+        else:
+            return None
+
+    def process_crossref_data(self) -> None:
+        """"This method parses the result of crossref query and feeds into
+            the Citation object."""
+        self.cit.process_doi(self.work.get("DOI"))
+        self.cit.issn = self.get_issn()
+        self.cit.isbn = self.get_isbn()
+        self.cit.edition = self.get_edition()
+        self.cit.author = self.get_authors()
+        self.cit.url = self.get_url()
+        self.cit.publication_date = self.get_publication_date()
+
         if self.work.get("type") in ["monograph", "edited-book"]:
-            try:
-                self.cit.volume_title = self.work.get("title", [])[0]
-            except IndexError:
-                pass
+            self.cit.volume_title = self.get_title()
+            self.cit.series_title = self.get_series_title()
 
-        # If book chapter
         elif self.work.get("type") == "book-chapter":
-            # Chapter title
-            try:
-                self.cit.article_title = self.work.get("title", [])[0]
-            except IndexError:
-                pass
+            self.cit.article_title = self.get_title()
+            self.cit.volume_title = self.get_container_title()
+            self.cit.first_page = self.get_first_page()
+            self.cit.series_title = self.get_series_title()
 
-            # Book (container) title
-            try:
-                self.cit.volume_title = self.work.get(
-                                               "container-title", [])[-1]
-            except IndexError:
-                pass
-
-            # First page
-            try:
-                self.cit.first_page = self.work.get("page").split("-")[0]
-            except AttributeError:
-                pass
-
-        # if journal
         elif self.work.get("type") == "journal-article":
-            # Journal title
-            try:
-                self.cit.journal_title = self.work.get(
-                                               "container-title", [])[-1]
-            except IndexError:
-                pass
-
-            # Article title
-            try:
-                self.cit.article_title = self.work.get("title", [])[0]
-            except IndexError:
-                pass
-
-            # Volume number
-            self.cit.volume = self.work.get("volume")
-
-            # Issue
-            self.cit.issue = self.work.get("issue")
-
-            # First page
-            try:
-                self.cit.first_page = self.work.get("page").split("-")[0]
-            except AttributeError:
-                pass
+            self.cit.article_title = self.get_title()
+            self.cit.journal_title = self.get_container_title()
+            self.cit.first_page = self.get_first_page()
+            self.cit.volume = self.get_volume_number()
+            self.cit.issue = self.get_issue_number()
 
     def get_citation(self) -> Citation:
         """Return a Citation object with the data gathered"""
