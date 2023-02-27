@@ -158,11 +158,21 @@ class Refine():
             return date.strftime("%Y-%m-%d")
 
     def get_title(self) -> str:
-        """Get title from self.work."""
+        """Get title from self.work. If a 'subtitle' is present, join
+           that to the 'title' field."""
+        title = None
         try:
-            return self.work.get("title", [])[0]
+            title = self.work.get("title", [])[0]
         except IndexError:
-            return None
+            pass
+
+        if title is not None:
+            try:
+                title += ": " + self.work.get("subtitle", [])[0]
+            except IndexError:
+                pass
+
+        return title
 
     def get_container_title(self) -> str:
         """Get name of the book or journal from self.work.

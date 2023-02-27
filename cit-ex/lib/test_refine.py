@@ -238,7 +238,16 @@ def test_get_publication_date_missing_parts(input_data, mocker):
 
 
 @pytest.mark.parametrize("input_data, expected_result",
-                         [[{"title": ["dummy"]}, "dummy"],
+                         [[{"title": ["dummy-title"]}, "dummy-title"],
+                          [{"title": ["dummy-title"],
+                            "subtitle": ["dummy-subtitle"]},
+                           "dummy-title: dummy-subtitle"],
+                          [{"subtitle": ["dummy-subtitle"]}, None],
+                          [{"title": [],
+                            "subtitle": ["dummy-subtitle"]}, None],
+                          [{"title": ["dummy-title"],
+                            "subtitle": []},
+                           "dummy-title"],
                           [{}, None]])
 def test_get_title(input_data, expected_result):
     p = Refine("Foo Bar")
