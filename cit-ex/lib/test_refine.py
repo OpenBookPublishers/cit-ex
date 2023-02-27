@@ -185,12 +185,13 @@ def test_get_edition(input_data, expected_result):
 
 
 @pytest.mark.parametrize("input_data, expected_result",
-                         [[{"author": [{"given": "a", "family": "b"}]}, "a b"],
+                         [[{"author": [{"given": "a", "family": "b"}]},
+                           "b, a"],
                           [{"author": [{"given": "a"}]}, "a"],
                           [{"author": [{"family": "b"}]}, "b"],
                           [{"author": [{"given": "a", "family": "b"},
                                        {"given": "c", "family": "d"}]},
-                           "a b; c d"],
+                           "b, a; d, c"],
                           [{"author": []}, None],
                           [{}, None]])
 def test_get_authors(input_data, expected_result):

@@ -129,7 +129,7 @@ class Refine():
         for author in self.work.get("author", []):
             given = author.get("given", "")
             family = author.get("family", "")
-            authors.append(" ".join(filter(None, [given, family])))
+            authors.append(", ".join(filter(None, [family, given])))
 
         if len(authors) > 0:
             return "; ".join(authors)
