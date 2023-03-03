@@ -102,10 +102,16 @@ def get_chapters(thoth_data: str) -> list:
 
     chapters = []
     for relation in relations:
-        doi = relation.get("relatedWork", {}).get("doi", {})
-        html = relation.get("relatedWork", {}).get("publications", {})[0] \
-                       .get("locations", {})[0].get("landingPage", {})
-        chapters.append({"doi": doi, "html_page": html})
+        doi = relation.get("relatedWork", {}).get("doi", None)
+
+        try:
+            html = relation.get("relatedWork", {}).get("publications", {})[0] \
+                           .get("locations", {})[0].get("landingPage", None)
+        except IndexError:
+            raise IndexError(f"No html data for relation {relation}.")
+
+        if (doi is not None) and (html is not None):
+            chapters.append({"doi": doi, "html_page": html})
 
     return chapters
 
