@@ -66,7 +66,7 @@ def query_thoth(book_doi: str) -> str:
        edition of each chapter of the book"""
     url = 'https://api.thoth.pub/graphql'
     query = {"query": "{ workByDoi (doi: \"%s\") { \
-                           relations { \
+                           relations (relationTypes: HAS_CHILD) { \
                               relatedWork { \
                                 doi \
                                 publications (publicationTypes: HTML) { \
