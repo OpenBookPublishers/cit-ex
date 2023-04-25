@@ -56,3 +56,22 @@ The wrapper runs with:
 (.env) $ `python3 obp-loader.py 10.11647/obp.0085`
 
 where "10.11647/obp.0085" is the DOI of the book to be parsed.
+
+#### Run OBP loader with Docker
+
+Clone the repository and build the image with:
+
+$ `docker build . -f Dockerfile-obp-loader -t openbookpublishers/cit-ex-obp-loader`
+
+Deploy a container with:
+
+```
+docker run --rm \
+           -e THOTH_EMAIL=$THOTH_EMAIL \
+           -e THOTH_PWD=$THOTH_PWD \
+           openbookpublishers/cit-ex-obp-loader \
+           obp-loader.py 10.11647/obp.0337
+
+```
+
+Where `$THOTH_EMAIL` and `$THOTH_PWD` are your thoth credentials and 10.11647/obp.0337 is the book-level DOI you wish to process.
