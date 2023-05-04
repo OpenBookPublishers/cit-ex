@@ -1,0 +1,17 @@
+FROM python:3.11-slim-buster
+
+RUN useradd -ms /bin/bash obp
+
+USER obp
+
+COPY requirements.txt /home/obp/
+
+RUN pip install --no-cache-dir -r /home/obp/requirements.txt
+
+WORKDIR /home/obp/cit-ex/
+
+COPY ./cit-ex/ ./
+
+ENTRYPOINT ["python3"]
+
+CMD ["./obp-loader.py", "--help"]
