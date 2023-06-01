@@ -73,7 +73,7 @@ class Refine():
     def _get_work_by_doi(self, doi: str, email: str) -> dict:
         """This method queries Crossref and returns a dictionary with
            the result"""
-        my_etiquette = Etiquette('cit-ex', '0.0.5', 'https://github.com/'
+        my_etiquette = Etiquette('cit-ex', '0.0.6', 'https://github.com/'
                                  'OpenBookPublishers/cit-ex', email)
         return Works(etiquette=my_etiquette).doi(doi)
 

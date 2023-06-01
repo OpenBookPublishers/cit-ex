@@ -121,6 +121,9 @@ def create_epub(url: str, epub_file_path: str) -> None:
        argument"""
     r = requests.get(url)
 
+    if r.status_code != 200:
+        raise TypeError(f"HTML chapter URL {url} returned unexpected status code {r.status_code}.")
+
     book = epub.EpubBook()
 
     chapter = epub.EpubHtml(title="Chapter", file_name="chapter.xhtml",
