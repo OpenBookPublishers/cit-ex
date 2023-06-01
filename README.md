@@ -1,10 +1,10 @@
-# cit-ex 
+# cit-ex
 A tool to extract citation data from EPUBs and upload it to a metadata repository.
 
-_cit-ex_ parses EPUB files looking for all the bibliographic references that match the html class(es) defined at prompt. 
+_cit-ex_ parses EPUB files looking for all the bibliographic references that match the html class(es) defined at prompt.
 These, in turn, get parsed for more granular results and then uploaded to a metadata of choice.
 
-As of v.0.0.5, the unstructured citations are parsed to find only DOI data and the only metadata repository supported is [Thoth](https://thoth.pub/)
+As of v.0.0.6, the unstructured citations are parsed to find only DOI data and the only metadata repository supported is [Thoth](https://thoth.pub/)
 
 ## Installation
 
@@ -31,7 +31,7 @@ If your references are marked either as _biblio_ or _biblio2_
 
 ### Usage example with Thoth
 
-Make sure your login credentials are stored in the environment variables "THOTH_EMAIL" and "THOTH_PWD". 
+Make sure your login credentials are stored in the environment variables "THOTH_EMAIL" and "THOTH_PWD".
 You also need to know the identifier (either its DOI or UUID) of the work you with to append the citation data to.
 
 Given that these pre-requisites are satisfied and your identifier is _10.11647/OBP.0288_, you can run the command:
