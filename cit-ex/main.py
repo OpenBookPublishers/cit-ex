@@ -84,8 +84,13 @@ def main():
     # If not dry run, write data to repository
     else:
         if args.repository == "thoth":
-            rep = Thoth(username=getenv('THOTH_EMAIL'),
-                        password=getenv('THOTH_PWD'))
+            username = getenv('THOTH_EMAIL')
+            password = getenv('THOTH_PWD')
+            if username is None:
+                raise KeyError(f"No Thoth username provided (THOTH_EMAIL environment variable not set)")
+            if password is None:
+                raise KeyError(f"No Thoth password provided (THOTH_PWD environment variable not set)")
+            rep = Thoth(username, password)
             rep.init_connection()
             rep.resolve_identifier(args.identifier)
 
