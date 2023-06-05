@@ -48,6 +48,9 @@ def main():
         if r.status_code == 200:
             chapters.append({"doi": args.doi, "html_page": bib_url})
 
+    if len(chapters) < 1:
+        raise KeyError(f"No chapters found in work metadata for {args.doi}")
+
     # create an epub for each chapter and run it through cit-ex
     for chapter in chapters:
         with tempfile.NamedTemporaryFile() as epub_file:
