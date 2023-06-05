@@ -1,4 +1,5 @@
 .env
 cit-ex/lib/__pycache__/
+cit-ex/__pycache__/
 .coverage
 htmlcov/
