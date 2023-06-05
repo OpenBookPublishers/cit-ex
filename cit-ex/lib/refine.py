@@ -145,10 +145,12 @@ class Refine():
         """Get publication date from self.work"""
         try:
             date_parts = self.work.get("issued", {}).get("date-parts", [])[0]
+            if date_parts[0] is None:
+                return None
         except IndexError:
             return None
         else:
-            # sometimes dates are incomplete, i.e. [1900] or [1900, 5]
+            # sometimes dates are incomplete, e.g. [1900] or [1900, 5]
             # and it is considered safe to default missing values to 1
             date_dict = {i: v for i, v in zip(["year", "month", "day"],
                                               date_parts)}
