@@ -65,7 +65,7 @@ def main():
 
 
 def query_thoth(book_doi: str) -> str:
-    """This method queries Thoth to get the landingPage URLs of the HTML
+    """This method queries Thoth to get the Full Text URLs of the HTML
        edition of each chapter of the book"""
     url = 'https://api.thoth.pub/graphql'
     query = {"query": "{ workByDoi (doi: \"%s\") { \
@@ -74,7 +74,7 @@ def query_thoth(book_doi: str) -> str:
                                 doi \
                                 publications (publicationTypes: HTML) { \
                                   locations { \
-                                    landingPage \
+                                    fullTextUrl \
                                   } \
                                 } \
                               } \
@@ -94,7 +94,7 @@ def query_thoth(book_doi: str) -> str:
 
 def get_chapters(thoth_data: str) -> list:
     """This method extracts data from a Thoth query
-       and returns a list of dictionaries with landingPage and DOI
+       and returns a list of dictionaries with fullTextUrl and DOI
        of each chapter"""
     try:
         relations = thoth_data["data"]["workByDoi"]["relations"]
@@ -109,7 +109,7 @@ def get_chapters(thoth_data: str) -> list:
 
         try:
             html = relation.get("relatedWork", {}).get("publications", {})[0] \
-                           .get("locations", {})[0].get("landingPage", None)
+                           .get("locations", {})[0].get("fullTextUrl", None)
         except IndexError:
             raise IndexError(f"No html data for relation {relation}.")
 
