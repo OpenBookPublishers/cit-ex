@@ -1,6 +1,6 @@
 beautifulsoup4==4.11.1
 ebooklib==0.17.1
-thothlibrary==0.18.0
+thothlibrary==0.26.0
 crossrefapi==1.5.0
-backoff==2.2.1 
+backoff==2.2.1
 progress==1.6
