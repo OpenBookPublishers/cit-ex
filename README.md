@@ -4,7 +4,7 @@ A tool to extract citation data from EPUBs and upload it to a metadata repositor
 _cit-ex_ parses EPUB files looking for all the bibliographic references that match the html class(es) defined at prompt.
 These, in turn, get parsed for more granular results and then uploaded to a metadata of choice.
 
-As of v.0.0.9, the unstructured citations are parsed to find only DOI data and the only metadata repository supported is [Thoth](https://thoth.pub/)
+As of v.0.0.10, the unstructured citations are parsed to find only DOI data and the only metadata repository supported is [Thoth](https://thoth.pub/)
 
 ## Installation
 

@@ -73,7 +73,7 @@ class Refine():
     def _get_work_by_doi(self, doi: str, email: str) -> dict:
         """This method queries Crossref and returns a dictionary with
            the result"""
-        my_etiquette = Etiquette('cit-ex', '0.0.9', 'https://github.com/'
+        my_etiquette = Etiquette('cit-ex', '0.0.10', 'https://github.com/'
                                  'OpenBookPublishers/cit-ex', email)
         return Works(etiquette=my_etiquette).doi(doi)
 
@@ -118,7 +118,7 @@ class Refine():
         edition = 0
         try:
             edition = int(self.work.get("edition-number"))
-        except TypeError:
+        except (TypeError, ValueError):
             pass
 
         return edition if edition > 0 else None
