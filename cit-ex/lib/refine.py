@@ -118,7 +118,7 @@ class Refine():
         edition = 0
         try:
             edition = int(self.work.get("edition-number"))
-        except TypeError:
+        except (TypeError, ValueError):
             pass
 
         return edition if edition > 0 else None
