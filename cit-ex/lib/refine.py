@@ -79,9 +79,11 @@ class Refine():
 
     def _is_valid_doi(self) -> bool:
         """This method tests whether a DOI is valid/exists"""
-        if self.work is not None:
+        try:
+            self.work.get("DOI")
             return True
-        return False
+        except AttributeError:
+            return False
 
     def get_issn(self) -> str:
         """Get ISSN from self.work"""
