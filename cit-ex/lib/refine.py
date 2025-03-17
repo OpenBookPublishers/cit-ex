@@ -73,15 +73,17 @@ class Refine():
     def _get_work_by_doi(self, doi: str, email: str) -> dict:
         """This method queries Crossref and returns a dictionary with
            the result"""
-        my_etiquette = Etiquette('cit-ex', '0.0.10', 'https://github.com/'
+        my_etiquette = Etiquette('cit-ex', '0.1.0', 'https://github.com/'
                                  'OpenBookPublishers/cit-ex', email)
         return Works(etiquette=my_etiquette).doi(doi)
 
     def _is_valid_doi(self) -> bool:
         """This method tests whether a DOI is valid/exists"""
-        if self.work is not None:
+        try:
+            self.work.get("DOI")
             return True
-        return False
+        except AttributeError:
+            return False
 
     def get_issn(self) -> str:
         """Get ISSN from self.work"""
