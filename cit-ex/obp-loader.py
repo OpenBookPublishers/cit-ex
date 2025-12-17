@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import argparse
+from os import path
 import requests
 import json
 import subprocess
@@ -29,6 +30,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("doi", type=str,
                         help="Work DOI")
+    parser.add_argument("--html-path", type=str, help="Path to folder containing HTML chapter files")
     parser.add_argument("--dry-run", action='store_true',
                         help="Perform a dry run: no data would be sent to "
                              "metadata repositories.")
@@ -54,7 +56,7 @@ def main():
     # create an epub for each chapter and run it through cit-ex
     for chapter in chapters:
         with tempfile.NamedTemporaryFile() as epub_file:
-            create_epub(chapter.get("html_page"), epub_file.name)
+            create_epub(chapter.get("html_page"), epub_file.name, args.html_path)
 
             cmd = f"python3 main.py {epub_file.name} " \
                   f"-c bibliography-first-para bibliography-other-para " \
@@ -119,19 +121,36 @@ def get_chapters(thoth_data: str) -> list:
     return chapters
 
 
-def create_epub(url: str, epub_file_path: str) -> None:
+def create_epub(url: str, epub_file_path: str, html_path: str | None) -> None:
     """This method creates an EPUB with the HTML page (URL) specified in the
        argument"""
-    r = requests.get(url)
+    if html_path:
+        # A local folder containing HTML chapter file data exists
+        # Select the correct file by cross-referencing the name against the URL
+        # URL is expected to be in the format `https://doi.org/[doiprefix]/[doi]/[filename.xhtml]`
+        # and HTML path is expected to contain a folder [doi] containing the file [filename.xhtml]
+        split_url = url.split('/')
+        local_path = path.join(html_path, split_url[-2], split_url[-1])
+        with open(local_path, 'rb') as chapter_file:
+            compile_epub(chapter_file.read(), epub_file_path)
 
-    if r.status_code != 200:
-        raise TypeError(f"HTML chapter URL {url} returned unexpected status code {r.status_code}.")
+    else:
+        # Retrieve HTML chapter file data directly from the URL
+        r = requests.get(url)
 
+        if r.status_code != 200:
+            raise TypeError(f"HTML chapter URL {url} returned unexpected status code {r.status_code}.")
+
+        compile_epub(r.text.encode(), epub_file_path)
+
+
+def compile_epub(chapter_file: bytes, epub_file_path: str) -> None:
+    """This method compiles an EPUB from the bytes object supplied and writes it to file"""
     book = epub.EpubBook()
 
     chapter = epub.EpubHtml(title="Chapter", file_name="chapter.xhtml",
                             lang="en-gb")
-    chapter.content = r.text.encode()
+    chapter.content = chapter_file
     book.add_item(chapter)
 
     book.toc = (epub.Link("chapter.xhtml", "Chapter", "ch"),

@@ -57,6 +57,12 @@ The wrapper runs with:
 
 where "10.11647/obp.0085" is the DOI of the book to be parsed.
 
+As an alternative to downloading the HTML edition directly from the URL (e.g. if firewalls prevent scripts from accessing it), a local copy can be specified with the optional argument `--html-path`, e.g.:
+
+(.env) $ `python3 obp-loader.py 10.11647/obp.0085 --html-path /tmp/HTML`
+
+where the folder "/tmp/HTML" contains a subfolder named "obp.0085", which contains files named in accordance with the URL structure (e.g. "ch1.xhtml" for the chapter URL "https://doi.org/10.11647/obp.0085/ch1.xhtml").
+
 #### Run OBP loader with Docker
 
 Clone the repository and build the image with:
