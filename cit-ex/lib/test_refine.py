@@ -78,7 +78,8 @@ def test_find_doi_match(unstructured_citation, expected_result):
 
 
 def test_is_valid_doi(mocker):
-    mocker.patch("refine.Refine._get_work_by_doi", return_value=True)
+    mocker.patch("refine.Refine._get_work_by_doi",
+                 return_value={"DOI": "10.123/123"})
     p = Refine("dummy_unstructured_citation", "dummy_doi")
     assert p._is_valid_doi() is True
 
