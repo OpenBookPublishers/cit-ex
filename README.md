@@ -31,7 +31,8 @@ If your references are marked either as _biblio_ or _biblio2_
 
 ### Usage example with Thoth
 
-Make sure your login credentials are stored in the environment variables "THOTH_EMAIL" and "THOTH_PWD".
+Make sure your personal access token is stored in the environment variable `THOTH_PAT`.
+If you want to provide a contact address for Crossref etiquette, you may also set the optional environment variable `CROSSREF_EMAIL`.
 You also need to know the identifier (either its DOI or UUID) of the work you with to append the citation data to.
 
 Given that these pre-requisites are satisfied and your identifier is _10.11647/OBP.0288_, you can run the command:
@@ -73,11 +74,11 @@ Deploy a container with:
 
 ```
 docker run --rm \
-           -e THOTH_EMAIL=$THOTH_EMAIL \
-           -e THOTH_PWD=$THOTH_PWD \
+           -e THOTH_PAT=$THOTH_PAT \
+           -e CROSSREF_EMAIL=$CROSSREF_EMAIL \
            openbookpublishers/cit-ex-obp-loader \
            obp-loader.py 10.11647/obp.0337
 
 ```
 
-Where `$THOTH_EMAIL` and `$THOTH_PWD` are your thoth credentials and 10.11647/obp.0337 is the book-level DOI you wish to process.
+Where `$THOTH_PAT` is your Thoth personal access token, `$CROSSREF_EMAIL` is an optional Crossref contact address, and 10.11647/obp.0337 is the book-level DOI you wish to process.

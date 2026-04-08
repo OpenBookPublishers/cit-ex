@@ -22,26 +22,22 @@ from repository import Repository
 
 def test_repository_attributes():
     rep = Repository()
-    assert hasattr(rep, "username")
-    assert hasattr(rep, "password")
+    assert hasattr(rep, "token")
 
 
 def test_repository_default_values():
     rep = Repository()
-    assert rep.username is None
-    assert rep.password is None
+    assert rep.token is None
 
 
 def test_repository_arguments():
-    rep = Repository("foo", "bar")
-    assert rep.username == "foo"
-    assert rep.password == "bar"
+    rep = Repository("foo")
+    assert rep.token == "foo"
 
 
 def test_repository_named_arguments():
-    rep = Repository(password="bar", username="foo")
-    assert rep.username == "foo"
-    assert rep.password == "bar"
+    rep = Repository(token="foo")
+    assert rep.token == "foo"
 
 
 def test_repository_init_connection():

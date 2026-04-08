@@ -27,6 +27,11 @@ from lib.repository import Thoth
 from progress.bar import Bar
 
 
+def get_crossref_email() -> str:
+    """Return the configured Crossref etiquette email or a safe default."""
+    return getenv('CROSSREF_EMAIL') or "no-email@offered.org"
+
+
 def main():
     parser = argparse.ArgumentParser(
                  prog="cit-ex",
@@ -66,7 +71,7 @@ def main():
     for c in unstr_citations:
         doi = Refine.find_doi_match(c)
         ref_cit = Refine(unstructured_citation=c, doi=doi,
-                         email=getenv('THOTH_EMAIL'))
+                         email=get_crossref_email())
 
         if doi and ref_cit._is_valid_doi():
             ref_cit.process_crossref_data()
@@ -84,13 +89,13 @@ def main():
     # If not dry run, write data to repository
     else:
         if args.repository == "thoth":
-            username = getenv('THOTH_EMAIL')
-            password = getenv('THOTH_PWD')
-            if username is None:
-                raise KeyError(f"No Thoth username provided (THOTH_EMAIL environment variable not set)")
-            if password is None:
-                raise KeyError(f"No Thoth password provided (THOTH_PWD environment variable not set)")
-            rep = Thoth(username, password)
+            token = getenv('THOTH_PAT')
+            if not token:
+                raise KeyError(
+                    "No Thoth personal access token provided "
+                    "(THOTH_PAT environment variable not set)"
+                )
+            rep = Thoth(token)
             rep.init_connection()
             rep.resolve_identifier(args.identifier)
 

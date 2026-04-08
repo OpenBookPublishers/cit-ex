@@ -24,17 +24,16 @@ from repository import Thoth
 
 
 def test_thoth_init():
-    rep = Thoth("foo", "bar")
-    assert rep.username == "foo"
-    assert rep.password == "bar"
+    rep = Thoth("foo")
+    assert rep.token == "foo"
 
 
 def test_thoth_init_connection(mocker):
     rep = Thoth()
-    login = mocker.patch("repository.ThothClient.login")
+    set_token = mocker.patch("repository.ThothClient.set_token")
     rep.init_connection()
 
-    login.assert_called_once()
+    set_token.assert_called_once_with(None)
 
 
 def test_resolve_identifier_w_valid_doi():
