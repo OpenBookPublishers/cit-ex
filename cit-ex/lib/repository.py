@@ -24,9 +24,8 @@ from thothlibrary import ThothClient
 class Repository():
     """Base Repository class to derive specialised classes from to interface
        with metadata repositories."""
-    def __init__(self, username: str = None, password: str = None) -> None:
-        self.username = username
-        self.password = password
+    def __init__(self, token: str = None) -> None:
+        self.token = token
         self.client = None
         self.identifier = None
 
@@ -43,7 +42,7 @@ class Thoth(Repository):
     """Class to interface with Thoth repository"""
     def init_connection(self) -> None:
         self.client = ThothClient()
-        self.client.login(self.username, self.password)
+        self.client.set_token(self.token)
 
     def resolve_identifier(self, identifier: str) -> None:
         """User would input either a DOI or a UUID from the CLI. This method
@@ -62,7 +61,9 @@ class Thoth(Repository):
 
         if doi_regex.search(identifier):
             doi = doi_regex.search(identifier).group()
-            work = self.client.work_by_doi(urljoin("https://doi.org/", doi))
+            work = self.client.work_by_doi(
+                doi=urljoin("https://doi.org/", doi)
+            )
             self.identifier = work.workId
         elif uuid_regex.search(identifier):
             self.identifier = uuid_regex.search(identifier).group()
